@@ -2,18 +2,18 @@
 
 taken from analysing `LuduvoApp.exe` and bruteforcing some stuff
 
-# Scripts
+## Scripts
 scripts seem to be attached to entities.
 within scripts, `self` refers to the entity, the equivalent of doing `script.Parent` in roblox.
 
 
-# Global Functions:
+## Global Functions:
 | function | ran |
 |---|---|
 | `Update(dt)` | every frame |
 | `PhysicsUpdate(dt)` | every physics step, probbaly at a fixed frequency idk|
 
-# Globals:
+## Globals:
 | global | notes |
 |---|---|
 | `print(s)` | prints to the output, you can currently only see it in studio.log |
@@ -24,7 +24,7 @@ within scripts, `self` refers to the entity, the equivalent of doing `script.Par
 | `script` | The current script object |
 | `world` | equivalent to roblox's workspace maybe |
 
-# Types:
+## Types:
 Still doing research on this
 
 - Vector3
