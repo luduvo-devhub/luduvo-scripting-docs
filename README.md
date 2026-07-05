@@ -1,4 +1,4 @@
-# Unnofficial Luduvo Script docs
+# Unofficial Luduvo Script docs
 
 taken from analysing `LuduvoApp.exe` and bruteforcing some stuff
 
@@ -29,4 +29,4 @@ Still doing research on this
 - Vector2
 - Instance
 - Signal
-- Twee
+- Tween
