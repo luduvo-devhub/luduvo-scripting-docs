@@ -26,13 +26,11 @@ end
 ## Globals:
 | global | notes |
 |---|---|
-| `print(s)` | prints to the output, you can currently only see it in studio.log |
 | `tick()` |  |
-| `wait(t)` | yields the current thread, this should exist |
-| `task` | scheduler library |
 | `typeof(x)` | Returns the luduvo type name of a value |
-| `script` | The current script object |
 | `world` | equivalent to roblox's workspace maybe |
+| `handles` | the handles of the entity the script is attached to |
+| `self` | the entity instance that the script is attached to |
 
 ## Types:
 Still doing research on this
