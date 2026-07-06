@@ -8,6 +8,14 @@
 scripts seem to be attached to entities.
 within scripts, `self` refers to the entity, the equivalent of doing `script.Parent` in roblox.
 
+## Script Handles
+You can access handles of the entity that the script is attached to via the `handles` global
+
+```lua
+for i,v in pairs(handles) do
+    print(i,v)
+end
+```
 
 ## Global Functions:
 | function | ran |
@@ -78,6 +86,20 @@ For Part Instances:
 - `Anchored`
 - `Velocity`
 
+UI Instances:
+- `Image`
+- `ImageColor`
+- `ImageTransparency`
+- `SliceCenter`
+- `CanvasSize`
+- `CanvasPosition`
+  
+Misc:
+- `NetworkID`
+- `StableID`
+- `RigidBody`
+- `CharacterMoveIntent`
+- `RemoteEntity`
 
 #### Events
 
