@@ -119,12 +119,13 @@ part.Parent = world
 #
 ### Signal
 `signal:Connect(callback)`
-stuff like `sig:Disconnect()` or `sig:Wait` proabably do exist but I can't find anything about them rn
+
+stuff like `sig:Disconnect()` or `sig:Wait` probably do exist but I can't find anything about them rn
 #
 ### Tween
 You can only tween UI instances
 
-Tween(Instnace, Duration, EasyingStyle, properties)
+Tween(Instance, Duration, EasyingStyle, properties)
 
 styles:
 - quad
