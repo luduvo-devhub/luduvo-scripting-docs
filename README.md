@@ -85,7 +85,7 @@ This may be incomplete.
 - `Instance.new(className)`
 
 Current creatable classes:
-`Part`, `SpawnPart`
+`Part`, `SpawnLocation`
 
 Note: Instance's are automatically parented to the 3d world.
 
