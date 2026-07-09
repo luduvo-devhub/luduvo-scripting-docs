@@ -19,7 +19,7 @@ Script Handles allow you to set references to other `Instances` via the Editor, 
 
 ![image](./assets/Handles.png)
 
-In this example above, we add a script handle component called `Map` onto partA, and we set the reference to `World.Model`. Scripts can access ScriptHandles of the entity that they're attached to via the `handles` global.
+In this example above, we add a script handle component called `Map` onto partA, and we set the reference to `World.Model`. Scripts can access ScriptHandles of the Instance that they're attached to via the `handles` global.
 
 In this example, inside a script attached to PartA:
 ```lua
@@ -50,8 +50,8 @@ This means that you can move/rename `World.Model` anywhere within your project, 
 ## Globals:
 | global | notes |
 |---|---|
-| `handles` | the handles of the entity the script is attached to |
-| `self` | the entity instance that the script is attached to |
+| `handles` | the handles of the Instance the script is attached to |
+| `self` | the Instance that the script is attached to |
 
 
 ## Types:
