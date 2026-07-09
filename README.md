@@ -3,37 +3,59 @@
 >[!WARNING]
 > Everything documented here is **untested** and may not work in an actual script, most of this is inferring what i'm seeing from analysing the executable. 
 
+Credits:
+
+- @lua_u on discord for the [environment dumper script](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/EnvDumper.luau)
+- @meowzers1/MeowzersDev
+- @primiti_ve2/Primiti-ve
+- @Uzixt
 
 ## Scripts
-scripts seem to be attached to entities.
-within scripts, `self` refers to the entity, the equivalent of doing `script.Parent` in roblox.
+Scripts are attached to Instances.
+within scripts, `self` points to the Instance that the script is attached to, the equivalent of doing `script.Parent` in roblox.
 
 ## Script Handles
-You can access handles of the entity that the script is attached to via the `handles` global
+Script Handles allow you to set references to other `Instances` via the Editor, which can then be accessed via scripts.
 
+![image](./assets/Handles.png)
+
+In this example above, we add a script handle component called `Map` onto partA, and we set the reference to `World.Model`. Scripts can access ScriptHandles of the entity that they're attached to via the `handles` global.
+
+In this example, inside a script attached to PartA:
 ```lua
-for i,v in pairs(handles) do
-    print(i,v)
-end
+print(handles.Map.Name) -- output: Model
 ```
+This means that you can move/rename `World.Model` anywhere within your project, and you won't need to update your code everytime you do so.
 
-## Global Functions:
+
+
+## Lifetime Functions:
 | function | ran |
 |---|---|
 | `Update(dt)` | every frame |
-| `PhysicsUpdate(dt)` | every physics step, probbaly at a fixed frequency idk|
+| `PhysicsUpdate(dt)` | every physics step, probably at a fixed frequency |
+
+## Global Functions:
+| function | notes |
+|---|---|
+| `tick()` |  returns a timestamp (seconds) |
+| `typeof(x)` | Returns the luduvo type name of a value |
+
+## Constructors
+| call | return |
+|---|---|
+| `Color3(r,g,b)` | Returns a Vector3. |
+| `Vector2(x, y)` | Returns a Vector3. | 
 
 ## Globals:
 | global | notes |
 |---|---|
-| `tick()` |  |
-| `typeof(x)` | Returns the luduvo type name of a value |
-| `world` | equivalent to roblox's workspace maybe |
 | `handles` | the handles of the entity the script is attached to |
 | `self` | the entity instance that the script is attached to |
 
+
 ## Types:
-Still doing research on this
+This may be incomplete.
 
 ### Vector3
 #### Constructor
@@ -53,15 +75,19 @@ Still doing research on this
 - `v:Cross(v2)`
 - `v:Lerp(v2, t)`
 #
-### Vector2
-Currently researching
-#
 ### UDim2
-Currently researching
+
+`UDim2(xScale, xOffset, yScale, yOffset) `
+
 #
 ### Instance
 #### Constructor
 - `Instance.new(className)`
+
+Current creatable classes:
+`Part`, `SpawnPart`
+
+Note: Instance's are automatically parented to the 3d world.
 
 #### Methods
 - `inst:Destroy()`
@@ -69,7 +95,7 @@ Currently researching
 - `inst:GetChildren()`
 - `inst:IsDescendantOf()`
 
-#### Properties
+#### Properties:
 For all Instances:
 - `Name`
 - `Parent`
@@ -114,13 +140,12 @@ For user interface instances?
 ```lua
 local part = Instance.new("Part")
 part.Position = Vector3.new(0,30,0)
-part.Parent = world
 ```
 #
 ### Signal
 `signal:Connect(callback)`
 
-stuff like `sig:Disconnect()` or `sig:Wait` probably do exist but I can't find anything about them rn
+`sig:Disconnect()` or `sig:Wait` probably do exist but we can't test for it right now.
 #
 ### Tween
 You can only tween UI instances
