@@ -13,3 +13,8 @@ See [CONTRIBUTING.md](https://github.com/luduvo-devhub/luduvo-scripting-docs/blo
 - @primiti_ve2 on Discord, primiti-ve on GitHub - Luduvo Developer Hub founder
 - @Uzixt on Discord/GitHub - Initial creator
 
+---
+
+<p align="center">
+  <a href="https://discord.gg/FcjTvuWKRk">Luduvo Development Hub Discord</a>
+</p>
