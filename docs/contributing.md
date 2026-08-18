@@ -1,9 +1,11 @@
+---
+icon: lucide/users
+---
+
 # Contributing
 
-> [!IMPORTANT]
-> The preferred method for running `zensical` is with [uv](https://docs.astral.sh/uv/).
-
-## How to clone the repo
+!!! important
+    The preferred method for running `zensical` is with [uv](https://docs.astral.sh/uv/).
 
 ```sh
 git clone https://github.com/luduvo-devhub/luduvo-scripting-docs.git --depth=1

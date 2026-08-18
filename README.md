@@ -1,5 +1,7 @@
 # Unofficial Luduvo Scripting Docs
 
+For full documentation, visit https://luduvo-devhub.github.io/luduvo-scripting-docs.
+
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/CONTRIBUTING.md).

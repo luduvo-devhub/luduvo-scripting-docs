@@ -11,13 +11,35 @@ repo_name = "luduvo-devhub/luduvo-scripting-docs"
 edit_uri = "edit/main/docs/"
 
 nav = [
-  { "Scripts & Script Handles" = "scripts.md" },
-  { "Globals" = "globals.md" },
-  { "Datatypes" = "datatypes.md" },
-  { "Instances" = [
-    "instances/index.md",
-    "instances/part.md",
-    "instances/spawnlocation.md",
+  { "Index" = "index.md" },
+  { "Contributing" = "contributing.md" },
+
+  { "API" = [
+    "api/index.md",
+
+    "api/scripts.md",
+    "api/globals.md",
+    "api/datatypes.md",
+
+    { "Instances" = [
+      "api/instances/index.md",
+      "api/instances/part.md",
+      "api/instances/spawnlocation.md",
+    ] },
+  ] },
+
+  { "Examples" = [
+    "examples/index.md",
+
+    { "Parts" = [
+      "examples/parts/index.md",
+      "examples/parts/spinning-part.md",
+      "examples/parts/moving-platform.md",
+    ] },
+
+    { "User Input (WIP)" = [
+      "examples/user-input/index.md",
+    ] },
   ] },
 ]
 
