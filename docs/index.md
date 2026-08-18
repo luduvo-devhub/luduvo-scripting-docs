@@ -1,6 +1,8 @@
-# Unofficial Luduvo Scripting Docs
+---
+icon: lucide/file-question-mark
+---
 
-For full documentation, visit https://luduvo-devhub.github.io/luduvo-scripting-docs.
+# Unofficial Luduvo Scripting Docs
 
 ## Contributing
 
@@ -12,4 +14,3 @@ See [CONTRIBUTING.md](https://github.com/luduvo-devhub/luduvo-scripting-docs/blo
 - @meowzers1 on Discord, MeowzersDev on GitHub
 - @primiti_ve2 on Discord, primiti-ve on GitHub - [PR 1](https://github.com/luduvo-devhub/luduvo-scripting-docs/pull/1), Luduvo Developer Hub founder
 - @Uzixt on Discord/GitHub - Initial creator
-
