@@ -1,0 +1,12 @@
+[project]
+name = "luduvo-scripting-docs"
+version = "0.1.0"
+description = "Unofficial Scripting Documentation for Luduvo"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "zensical>=0.0.55",
+]

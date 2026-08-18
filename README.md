@@ -1,4 +1,8 @@
-# Unofficial Luduvo Script docs
+# Unofficial Luduvo Scripting Docs
+
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/CONTRIBUTING.md).
 
 ## Credits
 
