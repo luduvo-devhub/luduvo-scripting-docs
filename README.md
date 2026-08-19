@@ -1,7 +1,10 @@
 # Unofficial Luduvo Script docs
 
->[!WARNING]
+> [!WARNING]
 > Everything documented here is **untested** and may not work in an actual script, most of this is inferring what i'm seeing from analysing the executable. 
+
+> [!CAUTION]
+> This branch will not be updated. Please use the `main` branch or go to https://luduvo-devhub.github.io/luduvo-scripting-docs/ for the most up to date documentation.
 
 Credits:
 
