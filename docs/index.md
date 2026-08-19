@@ -6,14 +6,16 @@ icon: lucide/file-question-mark
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/CONTRIBUTING.md).
+See the [Contributing](contributing) page for more details.
 
 ## Credits
 
-- @lua_u on Discord - [Environment Dumper script](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/scripts/EnvDumper.luau)
-- @meowzers1 on Discord, MeowzersDev on GitHub
-- @primiti_ve2 on Discord, primiti-ve on GitHub - Luduvo Developer Hub founder
-- @Uzixt on Discord/GitHub - Initial creator
+| Discord      | GitHub      | Description                                                                                                   |
+| ------------ | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| @Uzixt       | Uzixt       | Initial creator                                                                                               |
+| @primiti_ve2 | primiti-ve  | Luduvo Developer Hub founder                                                                                  |
+| @meowzers1   | MeowzersDev | Unknown                                                                                                       |
+| @lua_u       | Unknown     | [Environment Dumper](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/scripts/EnvDumper.luau) |
 
 ---
 
