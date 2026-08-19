@@ -2,7 +2,14 @@
 
 ## Difficulty
 
-This is a **medium** tutorial. It involves the use of Luau's [type solver](https://luau.org/types/), aswell as `table.sort` and lerping. It also involves using [Script Handles](../../api/scripts.md#script-handles).
+This is a **medium** tutorial.
+
+### Concepts Involved
+
+- [Script Handles](../../api/scripts.md#script-handles)
+- Luau's [type solver](https://luau.org/types/)
+- The [table library](https://luau.org/library/#table-library)
+- Lerping
 
 ## Setup
 
