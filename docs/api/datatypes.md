@@ -57,7 +57,7 @@ icon: lucide/file-text
 
 - `Instance.new(className: string)`
 
-??? note "Creatable classes"
+!!! note "Creatable classes"
     - `Part`
     - `SpawnLocation`
 
@@ -66,3 +66,43 @@ icon: lucide/file-text
 
 !!! warning
     Unlike Roblox, you cannot get children from dot notation, such as `partA.Child`. You must use `FindFirstChild`, such as `partA:FindFirstChild("Child")`.
+
+!!! danger
+    You cannot create instances on the Server.
+
+---
+
+### Signal
+
+!!! warning
+    Not much is known about this datatype right now.
+
+#### Methods
+
+- `signal:Connect(callback: (...unknown) -> ())`
+
+!!! note
+    `signal:Disconnect()` and `signal:Wait()` probably exist, but we have no way to test for either.
+
+---
+
+### Tween
+
+!!! note
+    Currently, you can only tween UI instances.
+
+#### Constructor(s)
+
+- `Tween(instance, duration, EasingStyle, properties)`
+
+!!! note
+    The types of the constructor arguments are currently unknown.
+
+!!! note "Usable styles"
+    - `Cubic`
+    - `Quad`
+    - `Sine`
+    - `Back`
+    - `Bounce`
+    - `Exponential`
+    - `Elastic`
