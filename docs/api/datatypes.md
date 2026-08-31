@@ -4,13 +4,6 @@ icon: lucide/file-text
 
 # Datatypes
 
-## Constructors
-
-| Name                                      | Description                        |
-| ----------------------------------------- | ---------------------------------- |
-| `Color3(r: number, g: number, b: number)` | Returns a Vector3                  |
-| `Vector2(x: number, y: number)`           | Returns a Vector3, with Z set to 0 |
-
 ## Types
 
 !!! warning
@@ -22,7 +15,7 @@ icon: lucide/file-text
 
 - `Vector3.new(x: number, y: number, z: number)`
 
-#### Constants
+#### Properties
 
 - `Vector3.zero`
 - `Vector3.one`
@@ -50,39 +43,120 @@ icon: lucide/file-text
 
 ### Instance
 
-!!! warning
-    See [the standalone Instances page](instances/index.md) for more detail.
+This is intentionally vague. Some Properties/methods have special read/write/execution rules depending on what type of script it was called with. See [the standalone Instance page](instances.md) for more details.
 
 #### Constructor(s)
 
-- `Instance.new(className: string)`
+- `Prefab.spawn(prefabName: string)`
+- `Instance.clone()`
 
-!!! note "Creatable classes"
-    - `Part`
-    - `SpawnLocation`
-
+!!! warning
+    You cannot spawn prefabs on the Client, and cloning instances from the client doesn't seem replicated to the server. Something there (the fact that cloning is client only or the fact that instance deletion is server only) is a bug.
 !!! note
     Instances are automatically parented to the 3D world.
 
 !!! warning
     Unlike Roblox, you cannot get children from dot notation, such as `partA.Child`. You must use `FindFirstChild`, such as `partA:FindFirstChild("Child")`.
 
-!!! danger
-    You cannot create instances on the Server.
+#### Properties
+
+- `Instance.Activated`
+- `Instance.Anchored`
+- `Instance.AngularDamping`
+
+- `Instance.Parent`
+
+- `Instance.Changed`
+- `Instance.ChildAdded`
+- `Instance.ChildRemoved`
+
+- `Instance.CollisionGroup`
+
+- `Instance.Name`
+- `Instance.Color`
+- `Instance.Kind`
+- `Instance.Transparency`
+
+- `Instance.Orientation`
+- `Instance.Position`
+- `Instance.Size`
+- `Instance.Velocity`
+
+- `Instance.Density`
+- `Instance.Friction`
+
+- `Instance.MeshId`
+- `Instance.EmissiveTextureId`
+- `Instance.TextureId`
+- `Instance.UnderlayTextureId`
+
+- `Instance.LinearDamping`
+- `Instance.Restitution`
+- `Instance.SpawnPoint`
+
+#### Methods
+
+- `Instance:AddComponent(name: string)`
+- `Instance:RemoveComponent(name: string)`
+- `Instance:HasComponent(name: string)`
+
+- `Instance:Destroy()`
+
+- `Instance:FindFirstChild(name: string)`
+- `Instance:GetChildren()`
+- `Instance:IsDescendantOf(ancestor: Instance)`
+
+- `Instance:GetSignal(name: string)`
+- `Instance:Emit(name: string, ...any)`
+
+- `Instance:GetIdentity()`
+
+- `Instance:GetMoveIntent()`
+- `Instance:GetSwingTwistJoint()`
+- `Instance:SetSwingTwistJoint(value: SwingTwistJoint)`
+
+- `Instance:GetLinearVelocity()`
+- `Instance:SetLinearVelocity(value: vector)`
+- `Instance:GetAngularVelocity()`
+- `Instance:SetAngularVelocity(value: vector)`
+
+- `Instance:ApplyForce(force: vector, point: vector?)`
+- `Instance:ApplyImpulse(impulse: vector, point: vector?)`
+- `Instance:ApplyTorque(torque: vector)`
+
+- `Instance:SetBodyMotion(mode: "dynamic" | "kinematic")`
+- `Instance:Rotate(axis: vector, angle: number)`
+
+- `Instance:PlayAnimation(clip: string, fadeSeconds: number?, speed: number?)`
+- `Instance:StopAnimation()`
+- `Instance:ActiveAnimation()`
+- `Instance:AnimationWeight(clip: string)`
+
+- `Instance:PreviewAnimation(clip: string, speed: number?, timeSeconds: number?)`
+- `Instance:AnimationPreview()`
+- `Instance:AdvancePreview()`
+- `Instance:StopPreview()`
 
 ---
 
 ### Signal
 
-!!! warning
-    Not much is known about this datatype right now.
+Signals are exclusively available to Instances, and Instances have their own signal lifecycle methods that they can use that aren't documented here. See [the standalone Instance page](instances.md#signals) for more details.
+
+### Constructors(s)
+
+!!! note
+    The only way to create a Signal is through Instances. As such, you cannot attach a Signal to anything that's not an Instance.
+
+- `Instance:GetSignal(signalName: string)`
 
 #### Methods
 
-- `signal:Connect(callback: (...unknown) -> ())`
+- `signal:Connect(callback: (...unknown))`
+- `signal:Emit()`
 
-!!! note
-    `signal:Disconnect()` and `signal:Wait()` probably exist, but we have no way to test for either.
+!!! danger
+    Neither `signal:Disconnect()` nor `signal:Wait()` are implemented yet (if ever). Such functionality will have to be implemented by yourself.
 
 ---
 

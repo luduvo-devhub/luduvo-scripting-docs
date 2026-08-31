@@ -16,6 +16,7 @@ See the [Contributing](contributing) page for more details.
 | @primiti_ve2 | primiti-ve  | Luduvo Developer Hub founder                                                                                  |
 | @meowzers1   | MeowzersDev | Unknown                                                                                                       |
 | @lua_u       | Unknown     | [Environment Dumper](https://github.com/luduvo-devhub/luduvo-scripting-docs/blob/main/scripts/EnvDumper.luau) |
+| @Jediweirdo  | Jediweirdo  | Updated to match the API state in Dirty 37                                                                                            |
 
 ---
 
