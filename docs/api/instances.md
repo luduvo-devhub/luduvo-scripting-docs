@@ -14,7 +14,7 @@ Similarly to an entity, an Instance is still largely defined by the [Components]
 
 There are several ways to get existing Instances in Luduvo. If you don't have a reference to an instance already, you can use the following methods:
 
-- [`game.World.Each`](query.md#query-for-instances){ data-preview } and, by extension, [its `Query` counterpart](query.md#query-for-components){ data-preview } for getting Instances based on their Components
+- [`game.World.Each`](query.md#query-for-instances){ data-preview } and, by extension, its [`Query`](query.md#query-for-components){ data-preview } counterpart for getting Instances based on their Components
 - [Script handles](scripts.md#script-handles){ data-preview } and the global [`self` parenting](scripts.md) for getting instances hand-made in the editor
 
 If you already have a reference to an Instance, you can use its hierarchy-related methods and properties to find other Instances through its parent or child relationships:
@@ -187,19 +187,19 @@ type Kind = "Part" | "ScreenGui"
 
 | Property | Scope | Behavior |
 | --- | --- | --- |
-| `Kind: string` | Read-only, client and server | Returns a creator-facing "kind". |
-| `Name: string` | Read/write, client and server | Reads or writes the `Name` component. |
-| `Parent: Instance?` | Read/write, client and server | Reads or replaces the Instance that is currently nested under. `nil` completelt detaches the Instance from the World Hierarchy. Assignment drives the local `ChildRemoved` and `ChildAdded` notifications described below. |
+| `Kind: string` | Read-only, Client and Server | Returns a creator-facing "kind". |
+| `Name: string` | Read/write, Client and Server | Reads or writes the `Name` component. |
+| `Parent: Instance?` | Read/write, Client and Server | Reads or replaces the Instance that is currently nested under. `nil` completelt detaches the Instance from the World Hierarchy. Assignment drives the local `ChildRemoved` and `ChildAdded` notifications described below. |
 
 #### Methods
 
 | Method | Scope | Behavior |
 | --- | --- | --- |
-| `Clone() -> Instance` | Client and server | Copies the Instance's children and registered components and prepares the Instance for replication by assigning it a fresh internal `NetworkID` if created on the server. |
+| `Clone() -> Instance` | Client and Server | Copies the Instance's children and registered components and prepares the Instance for replication by assigning it a fresh internal `NetworkID` if created on the server. |
 | `Destroy() -> ()` | Server only | Deletes the Instance, its components, and its all its nested children. You cannot read or write a destroyed Instance or any of its children. |
-| `FindFirstChild(name: string) -> Instance?` | Client and server | Returns the first child with the given name, or `nil` if no such child exists.|
-| `GetChildren() -> {Instance}` | Client and server | Returns all children that are nested under the Instance. |
-| `IsDescendantOf(ancestor: Instance) -> boolean` | Client and server | Checks if the Instance is nested under the given ancestor. |
+| `FindFirstChild(name: string) -> Instance?` | Client and Server | Returns the first child with the given name, or `nil` if no such child exists.|
+| `GetChildren() -> {Instance}` | Client and Server | Returns all children that are nested under the Instance. |
+| `IsDescendantOf(ancestor: Instance) -> boolean` | Client and Server | Checks if the Instance is nested under the given ancestor. |
 
 ### Appearance
 
@@ -207,21 +207,21 @@ type Kind = "Part" | "ScreenGui"
 
 | Property | Scope | Behavior |
 | --- | --- | --- |
-| `Position: vector` | Read/write, client and server | Reads or writes the [`Position`](components/Position.md){ data-preview } Component. If the Instance is a ScreenGui instead of a part, the setter also handles the [`UIRect`](components/UIRect.md) position fields. |
-| `Orientation: vector` | Read/write, client and server | Reads or writes the [`Rotation`](components/Rotation.md){ data-preview }. Currently, you cannot rotate UIs. |
-| `Size: vector` | Read/write, client and server | Reads or writes the [`Scale`](components/Scale.md){ data-preview }. If the Instance is a ScreenGui instead of a part, the setter also handles the [`UIRect`](components/UIRect.md) size fields. |
-| `Color: vector` | Read/write, client and server | Reads or writes the [`BrickColor`](components/BrickColor.md){ data-preview } Component. |
-| `Transparency: number` | Read/write, client and server | Reads or writes the [`Transparency`](components/Transparency.md){ data-preview } Component. |
-| `MeshId: number` | Read both; write server | Reads or writes the asset ID stored in the [`Mesh`](components/Mesh.md) Component. The stored field's creator-facing name has not been recovered. |
-| `TextureId: number` | Read both; write server | Reads or writes the [`SurfaceAppearance.Albedo`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
-| `EmissiveTextureId: number` | Read both; write server | Reads or writes the [`SurfaceAppearance.Emissive`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
-| `UnderlayTextureId: number` | Read both; write server | Reads or writes the [`SurfaceAppearance.Underlay`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
+| `Position: vector` | Read/write, Client and Server | Reads or writes the [`Position`](components/Position.md){ data-preview } Component. If the Instance is a ScreenGui instead of a part, the setter also handles the [`UIRect`](components/UIRect.md) position fields. |
+| `Orientation: vector` | Read/write, Client and Server | Reads or writes the [`Rotation`](components/Rotation.md){ data-preview }. Currently, you cannot rotate UIs. |
+| `Size: vector` | Read/write, Client and Server | Reads or writes the [`Scale`](components/Scale.md){ data-preview }. If the Instance is a ScreenGui instead of a part, the setter also handles the [`UIRect`](components/UIRect.md) size fields. |
+| `Color: vector` | Read/write, Client and Server | Reads or writes the [`BrickColor`](components/BrickColor.md){ data-preview } Component. |
+| `Transparency: number` | Read/write, Client and Server | Reads or writes the [`Transparency`](components/Transparency.md){ data-preview } Component. |
+| `MeshId: number` | read client and server; write Server | Reads or writes the asset ID stored in the [`Mesh`](components/Mesh.md) Component. The stored field's creator-facing name has not been recovered. |
+| `TextureId: number` | read client and server; write Server | Reads or writes the [`SurfaceAppearance.Albedo`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
+| `EmissiveTextureId: number` | read client and server; write Server | Reads or writes the [`SurfaceAppearance.Emissive`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
+| `UnderlayTextureId: number` | read client and server; write Server | Reads or writes the [`SurfaceAppearance.Underlay`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
 
 #### Methods
 
 | Method | Scope | Behavior |
 | --- | --- | --- |
-| `Rotate(axis: vector, angle: number) -> ()` | Client and server | Multiplies the public [`Rotation`](components/Rotation.md) Component by an axis-angle rotation and marks the internal body "dirty" if present. |
+| `Rotate(axis: vector, angle: number) -> ()` | Client and Server | Multiplies the public [`Rotation`](components/Rotation.md) Component by an axis-angle rotation and marks the internal body "dirty" if present. |
 
 ### Physics and gameplay
 
@@ -243,14 +243,14 @@ type SwingTwistJoint = {
 
 | Property | Scope | Behavior |
 | --- | --- | --- |
-| `Anchored: boolean` | Read/write, client and server | Reports if the [`Anchored`](components/Anchored.md) Component tag is present. Writing `true` adds it, and writing `false` removes it. |
-| `CollisionGroup: string` | Read/write, client and server | Reads or writes the [`CollisionGroup.Group`](components/CollisionGroup.md) by registered group name. |
-| `Density: number` | Read/write, client and server | Reads or writes the [`RigidBody.Density`](components/RigidBody.md) field. |
-| `Friction: number` | Read/write, client and server | Reads or writes the [`RigidBody.Friction`](components/RigidBody.md) field. |
-| `Restitution: number` | Read/write, client and server | Reads or writes the [`RigidBody.Restitution`](components/RigidBody.md) field. |
-| `LinearDamping: number` | Read/write, client and server | Reads or writes the [`RigidBody.LinearDamping`](components/RigidBody.md) field. |
-| `AngularDamping: number` | Read/write, client and server | Reads or writes the [`RigidBody.AngularDamping`](components/RigidBody.md) field. |
-| `Velocity: vector` | Read-only, client and server | Reads the [`Velocity`](components/Velocity.md) Component, but cannot be written directly. Use `SetLinearVelocity()` to write. |
+| `Anchored: boolean` | Read/write, Client and Server | Reports if the [`Anchored`](components/Anchored.md) Component tag is present. Writing `true` adds it, and writing `false` removes it. |
+| `CollisionGroup: string` | Read/write, Client and Server | Reads or writes the [`CollisionGroup.Group`](components/CollisionGroup.md) by registered group name. |
+| `Density: number` | Read/write, Client and Server | Reads or writes the [`RigidBody.Density`](components/RigidBody.md) field. |
+| `Friction: number` | Read/write, Client and Server | Reads or writes the [`RigidBody.Friction`](components/RigidBody.md) field. |
+| `Restitution: number` | Read/write, Client and Server | Reads or writes the [`RigidBody.Restitution`](components/RigidBody.md) field. |
+| `LinearDamping: number` | Read/write, Client and Server | Reads or writes the [`RigidBody.LinearDamping`](components/RigidBody.md) field. |
+| `AngularDamping: number` | Read/write, Client and Server | Reads or writes the [`RigidBody.AngularDamping`](components/RigidBody.md) field. |
+| `Velocity: vector` | Read-only, Client and Server | Reads the [`Velocity`](components/Velocity.md) Component, but cannot be written directly. Use `SetLinearVelocity()` to write. |
 
 #### Methods
 
@@ -264,16 +264,16 @@ type SwingTwistJoint = {
 | `ApplyImpulse(impulse: vector, point: vector?) -> ()` | Server only | Applies an impulse to internal `PhysicsBody` Component. It is ignored when no dynamic body exists. |
 | `ApplyTorque(torque: vector) -> ()` | Server only | Applies torque to internal `PhysicsBody`. It is ignored when no dynamic body exists. |
 | `SetBodyMotion(mode: "dynamic" \| "kinematic") -> ()` | Server only | Adds or removes the public [`Kinematic`](components/Kinematic.md) Component and changes the internal `PhysicsBody` Component's motion. Switching to `dynamic` clears live linear and angular velocity. |
-| `GetSwingTwistJoint() -> SwingTwistJoint?` | Client and server | Reads the [`SwingTwistJoint`](components/SwingTwistJoint.md) Component, or returns `nil` when absent. |
+| `GetSwingTwistJoint() -> SwingTwistJoint?` | Client and Server | Reads the [`SwingTwistJoint`](components/SwingTwistJoint.md) Component, or returns `nil` when absent. |
 | `SetSwingTwistJoint(value: SwingTwistJoint) -> ()` | Server only | Adds the [`SwingTwistJoint`](components/SwingTwistJoint.md) Component if needed, then replaces all its fields with the provided values. |
 
 #### Signal properties
 
 | Property | Scope | Behavior |
 | --- | --- | --- |
-| `Changed: Signal` | Read-only, client and server | Returns the built-in `Changed` signal. No automatic native emission was found, but user code can emit it with arbitrary arguments. |
-| `ChildAdded: Signal<Instance>` | Read-only, client and server | Emits a signal event containing the new Instance gets nested under it via `Parent` reassignment. |
-| `ChildRemoved: Signal<Instance>` | Read-only, client and server | Emits a signal event containing the old Instance when a `Parent` reassignment no longer points to itself. |
+| `Changed: Signal` | Read-only, Client and Server | Returns the built-in `Changed` signal. No automatic native emission was found, but user code can emit it with arbitrary arguments. |
+| `ChildAdded: Signal<Instance>` | Read-only, Client and Server | Emits a signal event containing the new Instance gets nested under it via `Parent` reassignment. |
+| `ChildRemoved: Signal<Instance>` | Read-only, Client and Server | Emits a signal event containing the old Instance when a `Parent` reassignment no longer points to itself. |
 
 ### User Data
 
@@ -297,13 +297,13 @@ type MoveIntent = {
 
 | Property | Scope | Behavior |
 | --- | --- | --- |
-| `SpawnPoint: boolean` | Read-only, client and server | Reports whether the [`SpawnPoint`](components/SpawnPoint.md) Component tag is present. |
+| `SpawnPoint: boolean` | Read-only, Client and Server | Reports whether the [`SpawnPoint`](components/SpawnPoint.md) Component tag is present. |
 
 #### Methods
 
 | Method | Scope | Behavior |
 | --- | --- | --- |
-| `GetIdentity() -> IdentityResult` | Client and server | Reads [`Identity`](components/Identity.md), [`DisplayName`](components/DisplayName.md), and [`Admin`](components/Admin.md) Components. If direct identity data is absent, it refers to an internal `SessionOwner` Component. |
+| `GetIdentity() -> IdentityResult` | Client and Server | Reads [`Identity`](components/Identity.md), [`DisplayName`](components/DisplayName.md), and [`Admin`](components/Admin.md) Components. If direct identity data is absent, it refers to an internal `SessionOwner` Component. |
 | `GetMoveIntent() -> MoveIntent` | Server only | Reads an internal `CharacterMoveIntent` Component. |
 
 
@@ -311,7 +311,7 @@ type MoveIntent = {
 
 | Property | Scope | Behavior |
 | --- | --- | --- |
-| `Activated: Signal<Instance>` | Read-only, client and server | Emits a signal event when UI with a [`UIClickable`](components/UIClickable.md) Component detects user input. It only emits automatically on the Client. |
+| `Activated: Signal<Instance>` | Read-only, Client and Server | Emits a signal event when UI with a [`UIClickable`](components/UIClickable.md) Component detects user input. It only emits automatically on the Client. |
 
 ### Animation
 

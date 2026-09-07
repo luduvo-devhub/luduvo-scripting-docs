@@ -72,7 +72,7 @@ For example, take [`Tool`](Tool.md){ data-preview }:
 
 ```luau
 for i = 1, query.count do
-    local equipped = query.Tool[i].equipped
+    local equipped = query.Tool.equipped[i]
     if equipped then
         print("A player is holding a tool!")
     end

@@ -39,7 +39,7 @@ local damage = EventTable("Damage", ToServer, {
     {"target", Entity},
     {"amount", F32},
     {"critical", Bool},
-}) --(1)!
+}) --(1)
 ```
 
 1. If this EventTable were to be used to send data to a server, the payload dictated by the `fields` mean that it would always take the form of:

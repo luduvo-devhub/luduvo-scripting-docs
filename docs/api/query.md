@@ -4,7 +4,7 @@ icon: lucide/list-filter
 
 # Queries
 
-Queries are the main way you search for any number of [Instances](instances.md){ data-preview } in a Luduvo World. If you know the specific type or location of the Instance you're looking for, you can use a [Script handle](scripts.md#script-handles) or [Instance hierarchy methods](instances.md#world-hierarchy).
+Queries are the main way you search for any number of [Instances](instances.md){ data-preview } in a Luduvo World. If you know the specific type or location of the Instance you're looking for, you can use a [Script handle](scripts.md#script-handles){data-preview} or [Instance hierarchy methods](instances.md#from-existing-instances).
 
 ## Query for Components
 
@@ -96,7 +96,7 @@ end
     Accessing values through a key-value loop will error:
 
     ```luau
-    for key, value in movers.Position do --(1)!
+    for key, value in movers.Position do --(1)
         error("QueryColumns cannot be used in a k, v pair loop")
     end
     ```
@@ -137,12 +137,12 @@ end
 
 As of writing, only four built-in components can be exposed as raw values in this build, and not all of them are writable:
 
-| Column | Luau type | Writable |
-| --- | --- | :---: |
-| `query.Position[i]` | `vector` | yes |
-| `query.Scale[i]` | `vector` | yes |
-| `query.BrickColor[i]` | `vector` | yes |
-| `query.Velocity[i]` | `vector` | no |
+| Column | Luau type | scope |
+| --- | --- | --- |
+| `query.Position[i]` | `vector` | read/write |
+| `query.Scale[i]` | `vector` | read/write |
+| `query.BrickColor[i]` | `vector` | read/write |
+| `query.Velocity[i]` | `vector` | **read-only** |
 
 The second possible shape is a nested field proxy:
 
