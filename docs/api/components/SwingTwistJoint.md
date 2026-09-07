@@ -3,16 +3,48 @@ icon: lucide/box
 ---
 
 !!! note
-    This is a stub and currently a work in progress. Contribute, or come back later for updates!
-
-!!! note
-    In the alpha build of Luduvo, scriptable components and components shown/organized in the editor's properties panel are completely different, with some compoents not even being accessible via the editor's properties panel and vice versa. Tread with caution.
+    Studio's property groups and the scripting component API are different. A
+    label shown in the Properties panel is not automatically a component name or
+    a Luau field.
 
 # SwingTwistJoint
 
-Stub
+`SwingTwistJoint` is a (case-sensitive) built-in component name that stores swing-twist joint settings.
+You can use it with [`game.World.Query`](../query.md){ data-preview },
+`Query:With`, `Query:Without`, [`game.World.Each`](../query.md){ data-preview },
+and the Instance component methods.
 
-Currently, this component is only accessible to scripts via [Query Filters](/luduvo-scripting-docs/api/query) and cannot be directly read or edited through scripts.
+## Script access
 
-## Properties
-This component currently has no properties editable through queries, Instances, or any other means.
+While this component can be used as a filter in Queries, it currently does not expose any of its fields to Queries. However, it can be accessed via `Instance:GetSwingTwistJoint()` and `SetSwingTwistJoint(...)`.
+
+Inspector fields are serialization/editor metadata and are not automatically
+available as Luau fields. See [Components](index.md){ data-preview } for that
+distinction and [Instances](../instances.md){ data-preview } for fixed property
+types and write scope.
+
+## Stored fields
+
+!!! note
+    Currently, these fields are not directly available as editable Luau. As such, they are reported as the types they are stored as in the engine itself instead of Luau types.
+
+| Field | Stored type | Notes |
+| --- | --- | --- |
+| `anchor.x` | `f32` |  |
+| `anchor.y` | `f32` |  |
+| `anchor.z` | `f32` |  |
+| `twistAxis.x` | `f32` |  |
+| `twistAxis.y` | `f32` |  |
+| `twistAxis.z` | `f32` |  |
+| `planeAxis.x` | `f32` |  |
+| `planeAxis.y` | `f32` |  |
+| `planeAxis.z` | `f32` |  |
+| `restAxis.x` | `f32` |  |
+| `restAxis.y` | `f32` |  |
+| `restAxis.z` | `f32` |  |
+| `planeConeDeg` | `f32` |  |
+| `normalConeDeg` | `f32` |  |
+| `twistMinDeg` | `f32` |  |
+| `twistMaxDeg` | `f32` |  |
+| `frictionTorque` | `f32` |  |
+

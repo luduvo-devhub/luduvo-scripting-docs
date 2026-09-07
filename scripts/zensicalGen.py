@@ -3,6 +3,25 @@ from pathlib import Path
 
 TOML_PATH = Path("zensical.toml")
 
+PREFAB_NAMES = {
+    "playerspawner": "PlayerSpawner",
+    "spawnlocation": "SpawnLocation",
+}
+
+TABS = {
+    "animation": "Animation",
+    "assets": "Assets",
+    "entity-report": "Entity Report",
+    "learn-luduvo": "Learn Luduvo",
+    "outliner": "Outliner",
+    "profiler": "Profiler",
+    "properties": "Properties",
+    "viewport": "Viewport",
+    "welcome": "Welcome",
+    "script-editor": "Script Editor",
+}
+
+
 SECTIONS = [
     {
         "key": "Components",
@@ -16,9 +35,21 @@ SECTIONS = [
         "dir": Path("docs/api/prefabs"),
         "rel": "api/prefabs",
         "marker": "PREFABS",
-        "display": lambda stem: stem[0].upper() + stem[1:] if stem else stem,
+        "display": lambda stem: PREFAB_NAMES.get(
+            stem, stem[0].upper() + stem[1:] if stem else stem
+        ),
+    },
+    {
+        "key": "Tabs",
+        "dir": Path("docs/editor/tabs"),
+        "rel": "editor/tabs",
+        "marker": "TABS",
+        "display": lambda stem: TABS.get(
+            stem, stem[0].upper() + stem[1:] if stem else stem
+        ),
     },
 ]
+
 
 def build_list(section):
     files = sorted(
@@ -35,6 +66,7 @@ def build_list(section):
         lines.append(f'    {{ "{name}" = "{rel_path}" }},')
     lines.append("  ] },")
     return "\n".join(lines), len(files)
+
 
 def main():
     toml_text = TOML_PATH.read_text(encoding="utf-8")
@@ -60,6 +92,7 @@ def main():
         print(f'Updated {section["key"]} entry with {count} file(s).')
 
     TOML_PATH.write_text(toml_text, encoding="utf-8")
+
 
 if __name__ == "__main__":
     main()

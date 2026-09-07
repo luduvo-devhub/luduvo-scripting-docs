@@ -4,167 +4,226 @@ icon: lucide/box
 
 # Instances
 
-Instances in Luduvo are essentially any objects that can physically show up in the World hiearchy tree. Menus, parts, characters, sounds, lights, Spawners, and more are all classified as an "Instance" under the hood.
+An `Instance` is Luduvo's slight spin on an ECS entity. As with normal [ECS entities](https://github.com/SanderMertens/ecs-faq#entity), Instances holds assets and game objects that interact directly with the engine rather than only with other scripts.
 
-However, despite their name, Luduvo Instances are not a "base" class like you might expect to see in object-oriented game engines like Roblox. Quite literally, everything in a Luduvo World tree is an Instance.
+Similarly to an entity, an Instance is still largely defined by the [Components](components/index.md){ data-preview } attached to them. However, Luduvo Instances also take a more OOP approach to their design and bundle many operations and helper functions into the Instance as methods and properties that can be called directly on the Instance itself.
 
-But on the other hand, Luduvo Instances are also not the traditional "entities" that you might expect to see in other ECS-based game engines. Normally, Entities are tiny husks that have almost no data or behavior of their own, and are instead almost entirely defined by the Components they hold inside of them. This is mostly true in Luduvo since it is also an ECS engine, but Instances almost resemble OOP base classes in the sense that they have a comparitively ginormous amount of built-in functionality designed to be extended by the user.
+## Obtaining Instances
 
-This unprecidented class size is mostly due to Instances containing everything that a helper function might have handled in its stead. There are a few weird exceptions that will likely be removed in later updates, but largely anything that pertains to an Instance can be handled directly by the Instance itself.
+### From Existing Instances
 
-## Creating Instances
+There are several ways to get existing Instances in Luduvo. If you don't have a reference to an instance already, you can use the following methods:
 
-There are three ways to create an Instance: 
+- [`game.World.Each`](query.md#query-for-instances){ data-preview } and, by extension, [its `Query` counterpart](query.md#query-for-components){ data-preview } for getting Instances based on their Components
+- [Script handles](scripts.md#script-handles){ data-preview } and the global [`self` parenting](scripts.md) for getting instances hand-made in the editor
 
-### Using the Editor
+If you already have a reference to an Instance, you can use its hierarchy-related methods and properties to find other Instances through its parent or child relationships:
 
-To avoid writing code, you can use the editor to directly create Instances that all automatically get initialized as soon as the project starts. Once they're created, you can then [parent scripts](scripts.md) to them to serve as a "starting point" for you to branch from. To access the other instances in your project, you can use hierarchy-related methods to traverse the World tree. These include:
+- `Instance.Parent`, which returns the Instance that the current Instance is nested under
+- `Instance:FindFirstChild`, which returns the first child Instance with the given name
+- `Instance:GetChildren`, which returns all nested Instances of the called Instance
+- `Instance:IsDescendantOf`, which checks whether the called Instance is a descendant of the given ancestor Instance
 
-| Field | Description |
-| --- | --- |
-| `Instance:FindFirstChild(name: string) -> Instance?` | Returns the first nested Instance with that name, or `nil`. There is no recursive argument. |
-| `Instance:GetChildren() -> {Instance}` | Returns an array of immediate children. |
-| `Instance:IsDescendantOf(ancestor: Instance) -> boolean` | Tests if the current Instance is nested inside the given `ancestor` Instance. |
-| `Instance.Parent: Instance?` | Returns the Instance currently nesting the current instance in, or `nil` if it has no parent. |
+More details on these methods and properties can be found in the [reference](#reference).
 
-All of these methods are available on all Instances regardless of where they are called.
+### From New Instances
 
-### Using Prefabs
+As of writing, there is no `Instance.new()` constructor that lets you create a blank entity directly. Instead, Instances must be created through these routes:
 
-If you need to factory spawn instances, you can use the [Prefab](/luduvo-scripting-docs/api/prefabs) system to create instances from a pre-defined template through the `World.Prefab:Spawn("PrefabName)` method. Details are available in the aformentioned documentation.
+- Make the Instance through the Editor
+- [`game.Prefabs.Spawn`](prefabs/index.md#spawning-prefabs){ data-preview } to spawn a premade Instance from a Luduvo object file
+- `Instance:Clone()` to duplicate an existing Instance
 
-### Using Clones
+#### Cloning
 
-Instances also manage their own lifecycle, with the ability to clone and destroy themselves through the aptly named `Instance:Clone()` and `Instance:Destroy()` methods.
+`Clone()` makes a new Instance with identical values to the source Instance wherever possible. 
 
-Interestingly, only `Instance:Clone()` is available for use on the client, while `Instance:Destroy()` is a server-only method. When called on the client, `Instance:Clone()` will return a copy of the instance that **is not replicated to the server**. This is likely a bug (`Instance.Destroy()` being server only, not cloning being available on the client), so be careful using this method on the client. On top of that, `Instant:Clone` intentionally clones the instance without parenting them to the World hierarchy in case you want to wait before sending clones to the server. As such, you need to remember to add the clone to the World hierarchy yourself by setting its `Parent` property to the desired parent instance.
+```luau
+local copy = self:Clone()
+copy.Parent = self.Parent --(1)!
+```
 
-If you need to make a clone that is replicated to the server from the client, use [Events](events.md).
+1. `self:Clone()` only creates the Instance. To be visible in the engine, it still needs to be parented to the World hierarchy.
+
+Native metadata exposes `Clone` to both server and client scripts and its implementation has no direct server check. Client execution has not been confirmed in a live test; if it succeeds, the result is local rather than automatically replicated.
+
+!!! warning
+    Destroying Instances with `Destroy()` is server-only. Client code should send an [Event](events.md) requesting that the server create or destroy an authoritative Instance.
+
 
 ## Component Management
 
-!!! note
-    You currently cannot create custom components, as all components are currently hardcoded into the engine. See the list of usable [Components](components/index.md) for the ones that are available for management.
+Instances come built in with methods for managing Components:
 
-Like with other ECS Entities, Instances are still laregely defined by the [Components](components/index.md) that are attached to them. Components are managed through `Instance:AddComponent(name: string)`, `Instance:RemoveComponent(name: string)` and `Instance:HasComponent(name: string)` methods. As their names suggest, these methods are used to add, remove and check for the presence of a component on an instance respectively. 
+```luau
+instance:AddComponent(name: string) -> ()
+instance:RemoveComponent(name: string) -> ()
+instance:HasComponent(name: string) -> boolean
+```
 
-These three components can be used on both the client and server, but the components are only manageable from the place that they were created from. For example, if you call `Instance:AddComponent(name: string)` from the server, only other server scripts will be able to access the component. If you try to manage the component from the client, you will be greeted with an error along the lines of `'<name>' is replicated; only server scripts may write it`. Server components remain readable to all clients, however. 
+As you might expect, `AddComponent()` adds a component to the Instance, `RemoveComponent()` removes it, and `HasComponent()` checks whether the given component is attached to the Instance. All 3 methods take a string `name` parameter, which requires the (case sensitive) name of the component you are looking to manage. 
 
-If you call `Instance:AddComponent(name: string)` from the client, only that specific client will be able to manage the component because it isn't replicated to the server at all. Attempting to access a client component from the server or other clients than the one that created it will result in a component-not-found-esq error.
+A full list of available components can be found in the [Component reference](components/index.md).
 
-If you need to manage a component from a different place than where it was created, you will need to create them from the server and use [Events](events.md) to let clients request mutations to the component.
+!!! warning
+    `HasComponent()` isn't properly implemented and always returns false regardless of if the component exists on the Instance or not.
 
-Once created, the only way to mutate the component fields themselves is through [Queries](query.md).
+These methods work differently depending on where they are called:
+
+- Only server scripts can add or remove replicated and server-only components. Changes to replicated components are replicated to all clients.
+- A client script can change only client-only components, but those changes stay local to that client's World.
+  - If a client attempts to write to a replicated component, Luduvo rejects it with `'<name>' is replicated; only server scripts may write it`.
+
+Queries are not the only way to access component values. Fixed properties above expose selected built-ins. Platform custom components expose nested field proxies:
+
+```luau
+self.PlayerSpawner.character = "Character"
+self.PlayerSpawner.respawnDelay = 3
+
+self.Tool.equipped = 1 --(1)! 
+```
+1. Note that this is an 8 bit integer, so this value can only go from 0 through 255
+
+## Attributes
+
+Currently, you cannot create your own components. However, if you need to store custom data on an Instance, you can still do so through the use of Attributes:
+
+```luau
+self.attr.Speed = 3
+print(self.attr.Speed)
+```
+
+Attributes are a key-value dictionary for storing custom data on an Instance stored in a `attr` field. They act exactly like regular Lua tables, which means you can create, read, and modify them using standard table operations.
+
+The only exception is that you cannot directly print the entire `attr` table through `print(self.attr)`. Instead, you can use `game.World.DumpAttributes(Instance)`:
+```luau
+game.World.DumpAttributes(self)
+```
+
+Replication rules still apply to attributes, so clients cannot write Attributes on a server-owned or replicated Instance.
 
 ## Signals
 
-!!! note
-    If you are looking for client to server communication, use [Events](events.md) instead.
+Signals are Luduvo's equivalent of BindableEvents/RBXScriptSignals, or some other game engine's "hook" event equivalent. Luduvo uses them internally to hook scripts into engine events, but they can also be created by you directly:
+
+```luau
+local damaged = self:GetSignal("Damaged")
+
+damaged:Connect(function(amount, source)
+    print(amount, source)
+end)
+
+damaged:Emit(10, self)
+self:Emit("Damaged", 10, self) -- equivalent after GetSignal registered the name
+```
+
+| Method | Behavior |
+| --- | --- |
+| `GetSignal(name: string) -> Signal` | Finds or creates a signal name for this Instance. |
+| `Signal:Connect(callback: (...any) -> ()) -> ()` | Appends a local callback. It returns no connection object. |
+| `Signal:Emit(...any) -> ()` | Synchronously calls the local callbacks with the supplied arguments. |
+| `Instance:Emit(name: string, ...any) -> ()` | Triggers an already registered name on this Instance. |
+
+
 !!! warning
     Custom signals cannot be deleted, and will remain in memory until the instance is destroyed. You need to make your own "deleted" check in custom signals if you plan on using them without causing memory leaks in your game.
 
-Signals are Luduvo's equivalent of BindableEvents/RBXScriptSignals, or some other game engine's "hook" event equivalent. Luduvo uses them internally to hook scripts into engine events, but they can also be created by you using `Instance:GetSignal(name: string, ...args: any) -> Signal`.
-
-Interstingly, `:GetSignal()` is the only way to create a signal, so they are likely intended to only be usable in the context of instances.
+`GetSignal()` is the only discovered way to create a signal, so custom signals are tied to Instances.
 
 ### Emitting Signals
 
 Once a signal is attached to an instance, it can be fired using `Signal:Emit(...args: any)`, and you can connect listeners to run callback functions on successful emission using `Signal:Connect(callback: (...args: any) -> ())`. 
 
-Signal connections and emmissions are completely local to where they are created, so they will **not** be replicated to other clients nor the server. If the server emits a signal on an instance that is replicated to and seen by other clients, only the server's signals will be emitted. If a client emits a signal on an instance that multiple clients and the server are listening to, only that client's signals will be emitted. The `args` defied in `GetSignal` are the exact args that you must emit in `Signal:Emit()` as well as the arguments given to the signal's `:Connect()` listeners.
+The arguments supplied to `Signal:Emit()` are passed directly to the signal's connected listeners.
 
-If you need a signal to emit across multiple clients and the server, you will need to do so by using [Events](events.md) or by putting emmission logic in a `game.World.Server` that polls for changes to the instance's components (which is likely how Luduvo's own signals are handled).
+Signal connections and emissions are completely local to where they are created, so they will **not** be replicated to other clients or the server. If the server emits a signal on an Instance that is replicated to and seen by other clients, only the server's handlers will run. If a client emits a signal on an Instance that multiple clients and the server can see, only that client's handlers will run.
 
+!!! tip
+    If you need a signal to emit across multiple clients and the server, use [Events](events.md) or put emission logic in a `game.World.System` that polls for changes to the Instance's components.
 
-Funnily enough, the `Emit` method will work on ANY signal, even if the Signal is supposed to be managed by Luduvo itself. This includes all 4 of the signals naturally created upon Instance creation:
+### Built-in Signals
+
 
 - `Instance.Changed:Connect()`, which does nothing
-- `Instance.ChildAdded:Connect(child: Instance)`, which fires when an instance is repareted to this instance via `Instance.Parent`. The `child` argument is the new instance that is being repareted to it.
-- `Instance.ChildRemoved:Connect(child: Instance)`, which fires when an instance under it is repareted to another instance or `nil` via `Instance.Parent`. The `child` argument is the old instance that is leaving your hierarchy.
-- `Instance.Activated:Connect(activator: Instance)`, which fires when the instance is clicked on. This signal is only relevant to UI Instances that have the [UIClickable](components/UIClickable.md) component attached to them. UIs with the [UIDisabled](components/UIClickable.md) component attached will be ignored and not trigger `Activated`.
+- `Instance.ChildAdded:Connect(child: Instance)`, which fires when an Instance is reparented to this Instance via `Instance.Parent`. The `child` argument is the Instance being reparented to it.
+- `Instance.ChildRemoved:Connect(child: Instance)`, which fires when a child is reparented to another Instance or `nil` via `Instance.Parent`. The `child` argument is the Instance leaving the hierarchy.
+- `Instance.Activated:Connect(activator: Instance)`, which fires when the Instance is clicked on. This signal is only relevant to UI Instances that have the [UIClickable](components/UIClickable.md) component attached to them. UIs with the [UIDisabled](components/UIDisabled.md) component attached will be ignored and not trigger `Activated`.
 
-!!! warning
+??? warning "Signal Jank"
     There are a few oddities about these signals that are worth noting:
-    - `ChildAdded`/`ChildRemoved` does not check if the instance being repareted to is itself and will fire even if the instance is being repareted to itself.
-    - `Changed` does nothing, has no arguments, and will not fire unless you manually `:Emit()` it.
+
+    - `ChildAdded`/`ChildRemoved` does not check whether the new parent is the existing parent, so the signals fire even when an Instance is reparented to the same parent.
+
+    - `Changed` has no automatic engine emission or payload. User code can still call `:Emit(...)` with its own arguments.
+
     - `Activated` will not fire if the character/player that activated is actively being destroyed or doesn't have a [Health](components/Health.md) component attached to it. It doesn't actually care if the character is dead or not, or is even a player at all (though you kind of have to be a player to click on it).
+
+Currently, the `Emit` method will work on ANY signal, even if the Signal is supposed to be managed by Luduvo itself.
 
 Alongside `signal:Emit()`, Instances also have `Instance:Emit(name: string, ...args: any)` that can be used to fire any signal by name you gave it when running `Instance:GetSignal()`.
 
-## Hardcoded Component Logic
+## Reference
 
-Currently, the line between what is owned by an Instance and what is owned by Components is shakey since many component and component fields are directly coupled to Instance methods and properties. This was probably done because of time constraints or the fact the Luduvo currently doesn't currently have the internal plumbing to express them in any other way. Here is a list of all of them, but expect these to be slowly phased out as the engine matures:
-
-### Input
-
-While this is technically user input, it's specialized specifically for character movement. Sorry if I excited you.
-
-#### Relevant Types
-
-```luau
-type MoveIntent = {
-    x: number,
-    z: number,
-    jump: boolean,
-    shiftLock: boolean,
-    targetYaw: number,
-}
-```
-
-#### Methods
-
-Method | Scope | Behavior |
-| --- | --- | --- |
-| `GetMoveIntent() -> MoveIntent` | Server only | Returns the current character movement request. |
-
-
-### Appearance
-
+??? note "Replication Rules"
+    `Read/write, client and server` in the property tables means that the native setter is exposed in both runtimes. It does not mean a client write is sent to the server.
+    
+    - A client property write changes that client's local World. It is non-authoritative, is not sent to the server or other clients, and may be replaced by a later server update.
+    - A server write to a replicated component follows normal server-to-client replication.
+    - Server-only setters raise an error from client scripts.
+    - A client must use a `ToServer` [EventTable](events.md) to request an authoritative change.
 !!! note
-    Anything marked runnable by a client is not replicated to the server or any other clients than the one the code was ran on.
-!!! note
-    Anywhere `vector` is used, `Vector3.new`, `Vector2.new`, and `Color3.new` will also work indiscriminately as inputs as well. See [Data Types](globals.md#data-types) for more information.
+    `vector` below is Luau's native vector type. Luduvo's `Vector3.new`, `Vector2.new`, and `Color3.new` all create that same runtime value.
+
+### World Hierarchy
 
 #### Properties
 
-Property | Scope | Behavior |
-| --- | --- | --- |
-`Kind: string` | Read-only, client and server | Computes a creator-facing entity kind from the entity's component set. `Shape.Type` and UI marker components contribute to the result; there is no single `Kind` component or field. |
-| `Name: string` | Read/write, client and server | Reads or writes the string value stored by the `Name` component.|
-| `Position: vector` | Read/write, client and server | Reads or writes the complete [`Position`](/luduvo-scripting-docs/api/components/position) component value. |
-| `Orientation: vector` | Read/write, client and server | Reads or writes the [`Rotation`](/luduvo-scripting-docs/api/components/rotation) component. Note that the Instance name (orientation) differs from the actual component name (rotation), but they are the same thing. |
-| `Size: vector` | Read/write, client and server | Reads or writes the complete [`Scale`](/luduvo-scripting-docs/api/components/scale) component value. |
-| `Color: vector` | Read/write, client and server | Reads or writes the RGB value in the [`BrickColor`](/luduvo-scripting-docs/api/components/brickcolor) component. |
-| `Transparency: number` | Read/write, client and server | Reads or writes the scalar [`Transparency`](/luduvo-scripting-docs/api/components/transparency) component value. |
-| `MeshId: number` | Read on client and server; write on server only | Reads or writes the asset-ID value stored by the [`Mesh`](/luduvo-scripting-docs/api/components/mesh) component. The stored field name was not recovered. |
-| `TextureId: number` | Read on client and server; write on server only | Reads or writes [`SurfaceAppearance.Albedo`](/luduvo-scripting-docs/api/components/surfaceappearance), exposed to Luau as a numeric asset ID. |
-| `EmissiveTextureId: number` | Read on client and server; write on server only | Reads or writes [`SurfaceAppearance.Emissive`](/luduvo-scripting-docs/api/components/surfaceappearance), exposed to Luau as a numeric asset ID. |
-| `UnderlayTextureId: number` | Read on client and server; write on server only | Reads or writes [`SurfaceAppearance.Underlay`](/luduvo-scripting-docs/api/components/surfaceappearance), exposed to Luau as a numeric asset ID.|
-| `SpawnPoint: boolean` | Read-only, client and server | Reports whether the fieldless [`SpawnPoint`](/luduvo-scripting-docs/api/components/spawnpoint) tag component is present.
-
-### Identity
-
-#### Relevant Types
-
 ```luau
-type IdentityResult = {
-    userId: number,
-    displayName: string,
-    isAdmin: boolean,
-}
+
+type Kind = "Part" | "ScreenGui"
+
 ```
+
+
+| Property | Scope | Behavior |
+| --- | --- | --- |
+| `Kind: string` | Read-only, client and server | Returns a creator-facing "kind". |
+| `Name: string` | Read/write, client and server | Reads or writes the `Name` component. |
+| `Parent: Instance?` | Read/write, client and server | Reads or replaces the Instance that is currently nested under. `nil` completelt detaches the Instance from the World Hierarchy. Assignment drives the local `ChildRemoved` and `ChildAdded` notifications described below. |
+
 #### Methods
 
-Method | Scope | Behavior |
+| Method | Scope | Behavior |
 | --- | --- | --- |
-| `GetIdentity() -> IdentityResult` | Client and server | Returns the entity's identity data.
+| `Clone() -> Instance` | Client and server | Copies the Instance's children and registered components and prepares the Instance for replication by assigning it a fresh internal `NetworkID` if created on the server. |
+| `Destroy() -> ()` | Server only | Deletes the Instance, its components, and its all its nested children. You cannot read or write a destroyed Instance or any of its children. |
+| `FindFirstChild(name: string) -> Instance?` | Client and server | Returns the first child with the given name, or `nil` if no such child exists.|
+| `GetChildren() -> {Instance}` | Client and server | Returns all children that are nested under the Instance. |
+| `IsDescendantOf(ancestor: Instance) -> boolean` | Client and server | Checks if the Instance is nested under the given ancestor. |
 
-### Physics
-!!! note
-    Anything marked runnable by a client is not replicated to the server or any other clients than the one the code was ran on.
-!!! note
-    Anywhere `vector` is used, `Vector3.new`, `Vector2.new`, and `Color3.new` will also work indiscriminately as inputs as well. See [Data Types](globals.md#data-types) for more information.
+### Appearance
 
+#### Properties
+
+| Property | Scope | Behavior |
+| --- | --- | --- |
+| `Position: vector` | Read/write, client and server | Reads or writes the [`Position`](components/Position.md){ data-preview } Component. If the Instance is a ScreenGui instead of a part, the setter also handles the [`UIRect`](components/UIRect.md) position fields. |
+| `Orientation: vector` | Read/write, client and server | Reads or writes the [`Rotation`](components/Rotation.md){ data-preview }. Currently, you cannot rotate UIs. |
+| `Size: vector` | Read/write, client and server | Reads or writes the [`Scale`](components/Scale.md){ data-preview }. If the Instance is a ScreenGui instead of a part, the setter also handles the [`UIRect`](components/UIRect.md) size fields. |
+| `Color: vector` | Read/write, client and server | Reads or writes the [`BrickColor`](components/BrickColor.md){ data-preview } Component. |
+| `Transparency: number` | Read/write, client and server | Reads or writes the [`Transparency`](components/Transparency.md){ data-preview } Component. |
+| `MeshId: number` | Read both; write server | Reads or writes the asset ID stored in the [`Mesh`](components/Mesh.md) Component. The stored field's creator-facing name has not been recovered. |
+| `TextureId: number` | Read both; write server | Reads or writes the [`SurfaceAppearance.Albedo`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
+| `EmissiveTextureId: number` | Read both; write server | Reads or writes the [`SurfaceAppearance.Emissive`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
+| `UnderlayTextureId: number` | Read both; write server | Reads or writes the [`SurfaceAppearance.Underlay`](components/SurfaceAppearance.md){ data-preview } field as a numeric asset ID. |
+
+#### Methods
+
+| Method | Scope | Behavior |
+| --- | --- | --- |
+| `Rotate(axis: vector, angle: number) -> ()` | Client and server | Multiplies the public [`Rotation`](components/Rotation.md) Component by an axis-angle rotation and marks the internal body "dirty" if present. |
+
+### Physics and gameplay
 
 ```luau
 type SwingTwistJoint = {
@@ -178,49 +237,81 @@ type SwingTwistJoint = {
     TwistMax: number,
     Friction: number,
 }
-
-type BodyMotionMode = "dynamic" | "kinematic"
-
 ```
 
 #### Properties
 
-Property | Scope | Behavior |
+| Property | Scope | Behavior |
 | --- | --- | --- |
-| `Anchored: boolean` | Read/write, client and server | Reports the presence of the fieldless [`Anchored`](/luduvo-scripting-docs/api/components/anchored) tag component. Writing `true` adds the tag and writing `false` removes it. |
-| `CollisionGroup: string` | Read/write, client and server | Reads or writes [`CollisionGroup.Group`](/luduvo-scripting-docs/api/components/collisiongroup) as a collision-group name rather than exposing the stored numeric group entry. |
-| `Density: number` | Read/write, client and server | Reads or writes [`RigidBody.Density`](/luduvo-scripting-docs/api/components/rigidbody). |
-| `Friction: number` | Read/write, client and server | Reads or writes [`RigidBody.Friction`](/luduvo-scripting-docs/api/components/rigidbody). |
-| `Restitution: number` | Read/write, client and server | Reads or writes [`RigidBody.Restitution`](/luduvo-scripting-docs/api/components/rigidbody). |
-| `LinearDamping: number` | Read/write, client and server | Reads or writes [`RigidBody.LinearDamping`](/luduvo-scripting-docs/api/components/rigidbody). |
-| `AngularDamping: number` | Read/write, client and server | Reads or writes [`RigidBody.AngularDamping`](/luduvo-scripting-docs/api/components/rigidbody). |
-| `Velocity: vector` | Read-only, client and server | Reads the complete [`Velocity`](/luduvo-scripting-docs/api/components/velocity) component value. Use the `SetLinearVelocity` method to write. |
+| `Anchored: boolean` | Read/write, client and server | Reports if the [`Anchored`](components/Anchored.md) Component tag is present. Writing `true` adds it, and writing `false` removes it. |
+| `CollisionGroup: string` | Read/write, client and server | Reads or writes the [`CollisionGroup.Group`](components/CollisionGroup.md) by registered group name. |
+| `Density: number` | Read/write, client and server | Reads or writes the [`RigidBody.Density`](components/RigidBody.md) field. |
+| `Friction: number` | Read/write, client and server | Reads or writes the [`RigidBody.Friction`](components/RigidBody.md) field. |
+| `Restitution: number` | Read/write, client and server | Reads or writes the [`RigidBody.Restitution`](components/RigidBody.md) field. |
+| `LinearDamping: number` | Read/write, client and server | Reads or writes the [`RigidBody.LinearDamping`](components/RigidBody.md) field. |
+| `AngularDamping: number` | Read/write, client and server | Reads or writes the [`RigidBody.AngularDamping`](components/RigidBody.md) field. |
+| `Velocity: vector` | Read-only, client and server | Reads the [`Velocity`](components/Velocity.md) Component, but cannot be written directly. Use `SetLinearVelocity()` to write. |
 
 #### Methods
 
-Method | Scope | Behavior |
-| --- | --- | --- |
-| `GetIdentity() -> IdentityResult` | Client and server | Returns the entity's identity data. |
-| `GetMoveIntent() -> MoveIntent` | Server only | Returns the current character movement request. |
-| `GetSwingTwistJoint() -> SwingTwistJoint?` | Client and server | Reads the joint definition, or returns `nil` when absent. |
-| `SetSwingTwistJoint(value: SwingTwistJoint) -> ()` | Server only | Replaces the joint definition. |
-| `GetLinearVelocity() ->P vector` | Server only | Reads rigid-body linear velocity. |
-| `SetLinearVelocity(value: vector) -> ()` | Server only | Replaces rigid-body linear velocity. |
-| `GetAngularVelocity() -> vector` | Server only | Reads rigid-body angular velocity. |
-| `SetAngularVelocity(value: vector) -> ()` | Server only | Replaces rigid-body angular velocity. |
-| `ApplyForce(force: vector, point: vector?) -> ()` | Server only | Applies a force, optionally at a point. The binding metadata does not label that point's coordinate space. |
-| `ApplyImpulse(impulse: vector, point: vector?) -> ()` | Server only | Applies an impulse, optionally at a point. |
-| `ApplyTorque(torque: vector) -> ()` | Server only | Applies torque to the rigid body. |
-| `SetBodyMotion(mode: BodyMotionMode) -> ()` | Server only | Switches the physics body's motion mode. Interestingly, switching from `Kinematic` to `Dynamic` clears the body's velocity. |
-| `Rotate(axis: vector, angle: number) -> ()` | Client and server | Applies an axis-angle rotation, subject to write authority. |
+| `GetLinearVelocity() -> vector` | Server only | Reads live internal `PhysicsBody` velocity, or zero when no live body exists. It does not read the public [`Velocity`](components/Velocity.md) Component directly. |
+| `SetLinearVelocity(value: vector) -> ()` | Server only | Changes internal `PhysicsBody` velocity and writes the public [`Velocity`](components/Velocity.md) Component. It is ignored when there is no dynamic body. |
+| `GetAngularVelocity() -> vector` | Server only | Reads live internal `PhysicsBody` angular velocity, or zero when no live body exists. |
+| `SetAngularVelocity(value: vector) -> ()` | Server only | Changes the internal `PhysicsBody` and `AngVelocity` Components. It is ignored when there is no physics body. |
+| `ApplyForce(force: vector, point: vector?) -> ()` | Server only | Applies force to internal `PhysicsBody`; the point's coordinate space is currently unknown. It does not rewrite the public [`RigidBody`](components/RigidBody.md) Component. |
+| `ApplyImpulse(impulse: vector, point: vector?) -> ()` | Server only | Applies an impulse to internal `PhysicsBody` Component. It is ignored when no dynamic body exists. |
+| `ApplyTorque(torque: vector) -> ()` | Server only | Applies torque to internal `PhysicsBody`. It is ignored when no dynamic body exists. |
+| `SetBodyMotion(mode: "dynamic" \| "kinematic") -> ()` | Server only | Adds or removes the public [`Kinematic`](components/Kinematic.md) Component and changes the internal `PhysicsBody` Component's motion. Switching to `dynamic` clears live linear and angular velocity. |
+| `GetSwingTwistJoint() -> SwingTwistJoint?` | Client and server | Reads the [`SwingTwistJoint`](components/SwingTwistJoint.md) Component, or returns `nil` when absent. |
+| `SetSwingTwistJoint(value: SwingTwistJoint) -> ()` | Server only | Adds the [`SwingTwistJoint`](components/SwingTwistJoint.md) Component if needed, then replaces all its fields with the provided values. |
 
+#### Signal properties
+
+| Property | Scope | Behavior |
+| --- | --- | --- |
+| `Changed: Signal` | Read-only, client and server | Returns the built-in `Changed` signal. No automatic native emission was found, but user code can emit it with arbitrary arguments. |
+| `ChildAdded: Signal<Instance>` | Read-only, client and server | Emits a signal event containing the new Instance gets nested under it via `Parent` reassignment. |
+| `ChildRemoved: Signal<Instance>` | Read-only, client and server | Emits a signal event containing the old Instance when a `Parent` reassignment no longer points to itself. |
+
+### User Data
+
+```luau
+type IdentityResult = {
+    userId: number,
+    displayName: string,
+    isAdmin: boolean,
+}
+
+type MoveIntent = {
+    x: number,
+    z: number,
+    jump: boolean,
+    shiftLock: boolean,
+    targetYaw: number,
+}
+```
+
+#### Properties
+
+| Property | Scope | Behavior |
+| --- | --- | --- |
+| `SpawnPoint: boolean` | Read-only, client and server | Reports whether the [`SpawnPoint`](components/SpawnPoint.md) Component tag is present. |
+
+#### Methods
+
+| Method | Scope | Behavior |
+| --- | --- | --- |
+| `GetIdentity() -> IdentityResult` | Client and server | Reads [`Identity`](components/Identity.md), [`DisplayName`](components/DisplayName.md), and [`Admin`](components/Admin.md) Components. If direct identity data is absent, it refers to an internal `SessionOwner` Component. |
+| `GetMoveIntent() -> MoveIntent` | Server only | Reads an internal `CharacterMoveIntent` Component. |
+
+
+#### Signal properties
+
+| Property | Scope | Behavior |
+| --- | --- | --- |
+| `Activated: Signal<Instance>` | Read-only, client and server | Emits a signal event when UI with a [`UIClickable`](components/UIClickable.md) Component detects user input. It only emits automatically on the Client. |
 
 ### Animation
-
-!!! note
-    Anything marked runnable by a client is not replicated to the server or any other clients than the one the code was ran on.
-
-#### Relevant Types
 
 ```luau
 type AnimationPreviewState = {
@@ -236,11 +327,11 @@ type AnimationPreviewState = {
 
 | Method | Scope | Behavior |
 | --- | --- | --- |
-| `PlayAnimation(clip: string, fadeSeconds: number?, speed: number?) -> ()` | Server only | Starts an animation clip with optional fade and speed arguments. |
-| `StopAnimation() -> ()` | Server only | Stops the active animation. |
-| `ActiveAnimation() -> string?` | Server only | Returns the active clip name, or `nil`. |
-| `AnimationWeight(clip: string) -> number?` | Server only | Returns the clip's current blend weight when available. |
-| `PreviewAnimation(clip: string, speed: number?, timeSeconds: number?) -> ()` | Server only | Starts or positions animation-preview playback. |
-| `AnimationPreview() -> AnimationPreviewState?` | Server only | Returns the current preview state, or `nil`. |
-| `AdvancePreview() -> boolean` | Server only | Advances preview state and reports whether it advanced. |
-| `StopPreview() -> boolean` | Server only | Stops preview playback and reports whether a preview was stopped.
+| `PlayAnimation(clip: string, fadeSeconds: number?, speed: number?) -> ()` | Server only | Changes the manually controlled animation layer in an internal `Animator` Component. It does not add or change the public [`CharacterAnimation`](components/CharacterAnimation.md) Component. |
+| `StopAnimation() -> ()` | Server only | Stops the manual layer in internal `Animator` and may close related preview state. |
+| `ActiveAnimation() -> string?` | Server only | Reads an internal `AnimLayerSet` Component and returns the active manual clip, or `nil`. |
+| `AnimationWeight(clip: string) -> number?` | Server only | Reads a clip's weight from an internal `AnimLayerSet` Component. |
+| `PreviewAnimation(clip: string, speed: number?, timeSeconds: number?) -> ()` | Server only | Starts or positions animation playback. |
+| `AnimationPreview() -> AnimationPreviewState?` | Server only | Reads this entity's scripting preview record. |
+| `AdvancePreview() -> boolean` | Server only | Advances the preview record and applies the new state. Boolean return value likely indicates success. |
+| `StopPreview() -> boolean` | Server only | Removes the preview record and closes the preview. Boolean return value likely indicates success. |

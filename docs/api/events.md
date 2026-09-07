@@ -1,87 +1,152 @@
 ---
-icon: lucide/box
+icon: lucide/send
 ---
 
 # Events
 
-!!! note
-    If you are looking for client to client or server to server communication, use [Signals](instances.md#signals) instead.
-
-Events are the only way for client and server scripts to communicate with each other in Luduvo.
+Events are the main way to send data back and forth between the client and server without worrying about scope and replication issues. They are not Instances nor for script-to-script local communication. Instead, use local [signals](instances.md#signals) when there is no need to communicate through the internet.
 
 ## Creating Events
-Unlike other game engines, Events are not instances that are part of the world hiearchy. To create an Event, you instead use the global `EventTable()` function:
+
+In Luduvo, Events are not objects in the World Hierarchy. To create an Event, use the global `EventTable()` function:
 
 ```luau
-type EventTable = (
+type EventDirection = typeof(ToServer) | typeof(ToClients)
+type EventFieldType =
+    typeof(F32) | typeof(I32) | typeof(U8) | typeof(Bool)
+    | typeof(Vec3) | typeof(Color) | typeof(Entity) 
+
+EventTable(
     name: string,
-    target: ToServer | ToClients,
-    fields: {{[string]: EventType | string}},
-) -> Event
-
-type EventType = Bool | I32 | F32 | U8 | Vec3 | Color | Entity
-
--- Example code:
-local clientEvent: Event = EventTable(
-    "EventName", 
-    ToServer, 
-    {{"MyAwesomeColor" = Color}, {"ACoolNumber" = I32}}
-)
-local serverEvent: Event = EventTable(
-    "EventName", 
-    ToClients, 
-    {{"MyDumbNumber" = I32}, {"MyCoolBoolean" = Bool}}
-)
+    direction: EventDirection,
+    fields: {{string | EventFieldType}}
+) -> EventTable
 ```
+
 !!! note
-    `target`'s possible values, and all values of `EventType` are all global variables, so do not surround them with quotes. `Prefab` seems to be another EventType that will be supported in the future.
-!!! warning
-    String values are deliberately not supported as a possible `EventType`. Don't use them.. There is also a hard cap of 64 fields per event, so take care not to exceed it.
-!!! tip
-    EventTables ironically cannot take raw tables as an `EventType`. You'll have to manually flatten the table into multiple `EventType` fields if it's a dictionary, or send values over the course of multiple events if its a list/array
+    The directions and field types are **not** strings, but a [global datatype](datatypes.md#events). You should not need to use quotation marks. 
 
-## Handling Events
+An EventTable takes the `name` of the event, which `direction` data is expected to transfer (it can either travel to the Server or to the Clients), and a table outlining the shape future data tables (A.K.A `fields`) will take when you send or receive data through this Event.
 
-Once you call `EventTable()`, you get back an `Event` object that you can use to "push" events through the event fields you defined. An event looks like this:
+The server declaration is authoritative. A client cannot introduce a table that the server did not declare, and its declaration must match the server's direction and schema.
+
+### Fields
+
+More on the `fields` parameter, each table entry should be a two-element array containing the field name and the data type they take:
+ 
+```luau
+local damage = EventTable("Damage", ToServer, {
+    {"target", Entity},
+    {"amount", F32},
+    {"critical", Bool},
+}) --(1)!
+```
+
+1. If this EventTable were to be used to send data to a server, the payload dictated by the `fields` mean that it would always take the form of:
+  ```luau
+  {
+      target = SomeInstance,
+      amount = someNumber,
+      critical = someBool,
+  }
+  ```
+
+When making fields for an EventTable, these are the supported field types you can use:
+
+- `F32`, which represents a 32-bit floating-point number from `-3.402823466e+38` to `3.402823466e+38`
+- `I32`, which represents a 32-bit signed integer from `-2147483648` to `2147483647`
+- `U8`, which represents an unsigned 8-bit integer from `0` to `255`
+- `Bool`, which represents a boolean
+- `Vec3`, which represents a Vector2 or Vector3 value
+- `Color`, which represents a Color3 value
+- `Entity`, which represents an Instance
+
+**Strings, nested tables, and arrays are not allowed as field types.** 
+
+!!! note
+    A `Prefab` field type appears have also been a planned for use with EventTables, but Luduvo currently rejects it. It seems to have some connection to the fact that you cannot transfer strings over an EventTable.
+
+??? tip "Getting around EventTable field restrictions"
+
+    If you need to send a string, convert it into bytes with `string.charCodeAt()` or `string.byte()`, and use a `U8` field type.
+
+    If you need to encode an array, send each element as a separate event or consolidate the array into a single value that you can then decode and reseparate once you receive it.
+
+    If you need to encode a nested table, flatten structured data across fields or replace tables with a pointer value that points to data sent in a separate event.
+
+## Using EventTables
+
+Similarly to [Queries](query.md#query-for-components), after creating an EventTable through `EventTable()`, you get an `EventTable` object that you then use to send and receive events through the internet:
 
 ```luau
-type Event = {
-    count: number, -- The number of events collected in this frame
-    sender: UserId, -- Exclusive to events initialized with `ToServer`
-    [string]: EventColumn, -- Each string is a field name defined in the Event's corresponding EventTable
+
+type EventColumn<T> = {
+    [string]: T,
 }
 
-type EventData = boolean | number | Vector3 | Color3 | Instance
+type EventTable = {
+    count: number,
+    sender: {number}?,
+    
+    [string]: EventColumn<boolean | number | vector | Instance?>,
 
-type EventColumn = {
-    push: (value: EventData) -> (),
-    pushTo: (target: UserId, value: EventData) -> (), -- Only relevant to events initialized with `ToClients`
-    [number]: EventData,
+    Push: (self: EventTable, ...any) -> (),
+    PushTo: (self: EventTable, userId: number, ...any) -> (),
 }
+```
 
--- Example code:
+### Sending Events
 
-clientEvent.MyAwesomeColor.push(Color3.new(1, 0, 0)) -- pushes to the server
-serverEvent.MyDumbNumber.push(424242) -- pushes to all clients
-serverEvent.MyCoolBoolean.pushTo(123456, true) -- pushes to a specific client with the UserId "123456"
+Because EventTables are purposely designed to only go one direction, the way you are able to send events differs depending on the direction you chose during initialization.
 
--- POV: some server code is receiving events from the client via `clientEvent`
-function Update(dt: number)
-    for i = 1, clientEvent.count do -- iterate over all events received from the client
-        local color = clientEvent.MyAwesomeColor[i]
-        local coolNum = clientEvent.ACoolNumber[i]
-        
-        if clientEvent.sender == 12345 then -- only print colors sent by a client with the UserId "123456"
-            print(color)
-        end
-    end
+Regardless of the direction, you will have access to `Push`. `Push` is an EventTable method that pushes its given parameters through the internet and to its intended destination. The data you push must match both the declaration order as well as the expected contents for every field that was declared in the EventTable. 
+
+However, `Push` operates differently depending on the direction. If the direction is `ToServer`, it sends the data straight to the server. However, if the direction is `ToClients`, it sends the data to every player/client currently connected to that server.
+
+If you need to send data only to a particular client, `ToClients` EventTables has access to `PushTo`, which sends the data to the user ID specified in the parameter **before** you specify which data to send.
+
+### Receiving Events
+
+When events are pushed to your device, the `EventTable` object automatically stores and converts the received data into luau-friendly values:
+
+| Field type | Luau value when the data is received |
+| --- | --- |
+| `F32`, `I32`, `U8` | `number` |
+| `Bool` | `boolean` |
+| `Vec3`, `Color` | `vector` |
+| `Entity` | `Instance?` |
+
+!!! note
+    Because there is a chance that the Instance sent through an `Entity` field will get destroyed before the data is able to arrive to its intended destination, the field accepts an `Instance` or `nil` if the reference cannot be resolved.
+
+!!! warning
+    EventTables store every event that they receive during a frame. When the frame ends, **the EventTable is cleared regardless of whether you are done with that data.** Store data separately if you need to process it over multiple frames or you will lose it. For more information, see the [Lifetime and Batch rules section](#batch-lifetime-rules-and-limits).
+
+Every time an event is received, the `EventTable` object stores the received payloads directly inside itself through a dedicated `EventColumn` array for each expected field. 
+
+Outside of the event payload data, EventTables also populates a `count` that stores the number of events the EventTable received in that frame. If the EventTable in question is a `ToServer` table, it will also create a dedicated `sender` eventColumn that stores the userId of the client that sent the event.
+
+Similarly to [QueryColumns](query.md#using-queries), data received from events pushed to your device are sorted by field and must be accessed through index-based `for` loops:
+
+```luau
+for i = 1, damage.count do
+    local senderId = damage.sender[i] -- server-side ToServer tables only
+    local target = damage.target[i]
+    local amount = damage.amount[i]
+    local critical = damage.critical[i]
 end
 ```
-!!! tip
-    To "sync" events between the client and server, both the client and server need to make the same `EventTable` under the same name containing the same names. The fields and the direction do not need to be the same, but you should use seprate names for seprate fields for your own sanity (different directions is okay though).
-!!! note
-    `EventData` is a "luau-ified" version of `EventType` that maps all its possible data types to their corresponding luau equivalents. `I32`, `F32`, and `U8` collapse into `number`, `Entity` become `Instance`, and `Vec3`/`Color` become `Vector3` and `Color3` respectively
 !!! warning
-    Unlike [Queries](query.md), events don't need to be refreshed to get the latest version of them because Luduvo automatically clear every event updates every frame. Not only can multiple scripts listen for and react to the same events without knowing that of each other's existance, but **any event not dealth with the frame it was push are gone forever**. If the client/server skips frames, **it can also potentially skip events**. Watch for race conditions and invisible bugs!
+    Putting any EventColumn data in key-value pair loops (e.g. `for k, v in x do`, `for k, v in pairs() do`, and `for k, v in ipairs() do`) will cause an error
 
-It's easiest to think of `Event`s as a collection of remote events constantly listening for updates. Since a server or a client can push multiple events in a single frame, events need to be processed with a loop over `Event.count` (which is the number of events collected in the current frame).
+## Batch Lifetime Rules and Limits
+
+Incoming events are the batch of events received on that specific frame. Unlike Queries, there is no `Refresh`, `Pop`, or general lifecycle management exposed to the public API. 
+
+Multiple scripts may read the same rows during that frame, but reading said events does not consume them. Luduvo clears the incoming batch when the event system advances to the next frame, so you will need to copy any data to a new variable if you need said data to survive longer.
+
+Each EventTable accepts at most 64 incoming and 64 outgoing events per frame. There does not seem to be a similar limit on the number of event columns.
+
+If you ever need to debug event tables, the global `EventTableDump()` prints diagnostic information about every active event table to the console, but returns nothing.
+
+Currently there doesn't seem to be a way to destroy created event tables.

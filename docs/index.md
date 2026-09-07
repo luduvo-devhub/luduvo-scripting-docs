@@ -6,7 +6,7 @@ icon: lucide/file-question-mark
 
 ## Contributing
 
-See the [Contributing](contributing) page for more details.
+See the [Contributing](contributing.md) page for more details.
 
 ## Credits
 

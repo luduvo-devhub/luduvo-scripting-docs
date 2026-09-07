@@ -3,30 +3,16 @@ icon: lucide/map-pin-house
 ---
 
 # SpawnLocation
-SpawnLocation is a prefab that represents a location where a player can respawn when they die. It's largely just a `Part` with an additional `SpawnLocation` component.
 
-Works hand-in-hand with the `PlayerSpawner` prefab, where the player spawning logic itself is handled.
+`SpawnLocation` is a part-like prefab marked as a possible character spawn point. The exact scripting component name is `SpawnPoint`, not `SpawnLocation`.
 
-## Constructor(s)
+```luau
+local location = game.Prefabs.Spawn("SpawnLocation")
 
-- `Prefab.spawn("SpawnLocation")`
+if location ~= nil then
+    location.Parent = self
+    print(location.SpawnPoint) -- true when the tag is present
+end
+```
 
-!!! note
-    SpawnLocations are automatically parented to the 3D world.
-
-## Components
-
-### Removable
-
-- `Transform`
-- `Data`
-- `PrefabInstance`
-- `Shape`
-- `Physics`
-- `Color`
-- `Material`
-- `SpawnLocation`
-
-### Permanent
-
-- `Attributes`
+`Spawn` is server-only and returns a detached root. The built-in [PlayerSpawner](playerspawner.md) searches with `game.World.Each("SpawnPoint")` when choosing a spawn location.

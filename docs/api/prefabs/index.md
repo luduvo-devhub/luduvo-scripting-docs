@@ -1,15 +1,15 @@
 ---
-icon: lucide/box
+icon: lucide/package
 ---
 
 # Prefabs
 
 !!! note
-    If you are familiar with Unity, Luduvo prefabs are conceptually [Unity prefabs](https://docs.unity3d.com/6000.7/Documentation/Manual/Prefabs.html).
+    If you are familiar with Unity, Luduvo prefabs are conceptually similar to [Unity prefabs](https://docs.unity3d.com/6000.7/Documentation/Manual/Prefabs.html).
 
-Prefabs are premade/serialized [Instances](/luduvo-scripting-docs/api/instances) that can be easily reused between Luduvo projects, and are required for Luduvo scripts to programmatically spawn non-cloned instances in your game.
+Prefabs are premade, serialized [Instances](../instances.md){ data-preview } that can be reused between Luduvo projects. Luduvo scripts use them to programmatically spawn Instances that are not clones of an existing entity.
 
-Currently, Luduvo ships with these premade prefabs:
+Luduvo ships these core prefabs:
 
 - [Part](part.md)
 - [SpawnLocation](spawnlocation.md)
@@ -17,18 +17,35 @@ Currently, Luduvo ships with these premade prefabs:
 - [Menu](menu.md)
 - [Character](character.md)
 
-The prefabs stored in `core://` (which translates to Luduvo's `%AppData%` folder) cannot be directly edited. If selected in the editor, they will instead be cloned into your project and open a dummy scene for prefab editing.
+## Storage
 
-You can also make your own prefabs in the editor by creating a new scene, selecting the desired Instance, and going to `File > Export Model...` while your project is not in playtesting. However, you cannot make your own prefabs programmatically.
+Prefabs are stored in the `core://prefabs/` and `project://prefabs/` virtual mounts. Prefabs and other files stored in `core://` are versioned and updated by Luduvo.
 
-To import a prefab into your project and expose custom prefabs to scripts, you need to copy it into your project's directory, select it in Luduvo's asset editor, and choose `Insert into Scene` from the right click menu.
+## Creating and editing prefabs
 
-Once inserted into the scene, you can access it from scripts using the `Prefab` API:
+Opening a core prefab for editing creates a project copy at `project://prefabs/<Name>.ldv` and opens it in a prefab-edit world. Edit the project copy, not the installed core content.
 
-```lua
-if game.Prefab.Exists("PrefabName") then
-    local createdInstance = game.Prefab.Spawn("PrefabName")
+To create a prefab from scene content, stop playtesting, select exactly one root entity, and use **File > Export Model...**. The exported `.ldv` can then be stored under the project's prefab directory. Prefab lookup reads the registered core/project store; inserting a prefab into the current scene is not required to make `Exists` or `Spawn` find it.
+
+There is no Luau API for defining or saving prefab files at runtime.
+
+## Spawning prefabs
+
+Service functions use dot syntax:
+
+```luau
+if game.Prefabs.Exists("MyPrefab") then
+    local root = game.Prefabs.Spawn("MyPrefab")
+
+    if root ~= nil then
+        root.Parent = self
+    end
 end
 ```
-!!! warning
-    Spawning a prefab in client scripts will throw an error.
+
+| Method | Scope | Behavior |
+| --- | --- | --- |
+| `game.Prefabs.Exists(name: string) -> boolean` | Client and server | Checks a logical, case-sensitive name without creating anything. |
+| `game.Prefabs.Spawn(name: string) -> Instance?` | Server only | Instantiates the complete tree and returns its detached root, or `nil` on failure. |
+
+Pass `"MyPrefab"`, not a `.ldv` path or URI. The returned root is not automatically parented or positioned.

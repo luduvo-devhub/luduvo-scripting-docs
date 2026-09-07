@@ -4,179 +4,70 @@ icon: lucide/file-text
 
 # Datatypes
 
-## Types
-
 !!! warning
-    This section is incomplete. Feel free to contribute!
+    This section is incomplete. It includes the types confirmed in the current build, but not every Luau standard-library type.
 
-### Vector3
+## Vectors
 
-#### Constructor(s)
+Luduvo uses Luau's native `vector` value for 3D vectors, 2D points, and colors. The constructor table describes the value's intended meaning; it does not change its runtime type.
 
-- `Vector3.new(x: number, y: number, z: number)`
+```luau
+local position: vector = Vector3.new(1, 2, 3)
+local point: vector = Vector2.new(10, 20) -- (10, 20, 0)
+local red: vector = Color3.new(1, 0, 0)
+```
 
-#### Properties
+`Vector3` also exposes `zero`, `one`, `xAxis`, `yAxis`, and `zAxis`. Vector arithmetic and members come from Luau's native vector implementation rather than a Luduvo-specific `Vector3` class.
 
-- `Vector3.zero`
-- `Vector3.one`
-- `Vector3.xAxis`
-- `Vector3.yAxis`
-- `Vector3.zAxis`
+## `UDim2`
 
-#### Methods
+```luau
+UDim2.new(
+    xScale: number?,
+    xOffset: number?,
+    yScale: number?,
+    yOffset: number?
+) -> UDim2
+```
 
-- `v:Magnitude()`
-- `v:Unit()`
-- `v:Dot(v2: Vector3)`
-- `v:Cross(v2: Vector3)`
-- `v:Lerp(v2: Vector3, t: number)`
+The arguments default to zero. The stored values mean X scale, X pixel offset, Y scale, and Y pixel offset, matching Roblox's four-part layout.
 
----
+Luduvo's API is smaller than Roblox's: this build exposes construction, the `UDim2` runtime type, and string conversion. It does not expose `X`, `Y`, nested `UDim` values, `fromScale`, `fromOffset`, or arithmetic operators.
 
-### UDim2
+## Events
 
-#### Constructor(s)
+When creating Events in Luduvo, you must specify the kind of data you are looking to transport within the event. Luduvo provides the following global data types:
 
-- `UDim2.new(xScale: number, xOffset: number, yScale: number, yOffset: number)`
+- F32
+- I32
+- U8
+- Bool
+- Vec3
+- Color
+- Entity
+- ToServer
+- ToClients
 
----
+All of these types are closer to enum values than a data type, as their only use is to act as var. 
 
-### Instance
+See [Events](events.md) for more details.
 
-This is intentionally vague. Some Properties/methods have special read/write/execution rules depending on what type of script it was called with. See [the standalone Instance page](instances.md) for more details.
+## `Instance`
 
-#### Constructor(s)
+An `Instance` is the scripting equivalent of an ECS Entity. While there is currently no `Instance.new()` constructor, you can still programmatically obtain an Instance from [`game.Prefabs.Spawn`](prefabs/index.md#spawning-prefabs), [`Instance:Clone`](instances.md#cloning), [queries](query.md), [World hierarchy traversal](instances.md#from-existing-instances), [script handles](scripts.md#script-handles), and any other APIs that return entities.
 
-- `Prefab.spawn(prefabName: string)`
-- `Instance.clone()`
+See [Instances](instances.md#reference) for more details.
 
-!!! warning
-    You cannot spawn prefabs on the Client, and cloning instances from the client doesn't seem replicated to the server. Something there (the fact that cloning is client only or the fact that instance deletion is server only) is a bug.
-!!! note
-    Instances are automatically parented to the 3D world.
+## `Signal`
 
-!!! warning
-    Unlike Roblox, you cannot get children from dot notation, such as `partA.Child`. You must use `FindFirstChild`, such as `partA:FindFirstChild("Child")`.
+```luau
+instance:GetSignal(name: string) -> Signal
+signal:Connect(callback: (...any) -> ()) -> ()
+signal:Emit(...any) -> ()
+```
 
-#### Properties
+`GetSignal` finds or creates a signal associated with an Instance and name. Signals are local to the current client or server that makes them, and they do not replicate.
 
-- `Instance.Activated`
-- `Instance.Anchored`
-- `Instance.AngularDamping`
+`Connect` is a method that runs its given function when the signal is emitted. Currently, there are no `Disconnect`, `Wait`, or `Once` operations, so a callback must make its own versions.
 
-- `Instance.Parent`
-
-- `Instance.Changed`
-- `Instance.ChildAdded`
-- `Instance.ChildRemoved`
-
-- `Instance.CollisionGroup`
-
-- `Instance.Name`
-- `Instance.Color`
-- `Instance.Kind`
-- `Instance.Transparency`
-
-- `Instance.Orientation`
-- `Instance.Position`
-- `Instance.Size`
-- `Instance.Velocity`
-
-- `Instance.Density`
-- `Instance.Friction`
-
-- `Instance.MeshId`
-- `Instance.EmissiveTextureId`
-- `Instance.TextureId`
-- `Instance.UnderlayTextureId`
-
-- `Instance.LinearDamping`
-- `Instance.Restitution`
-- `Instance.SpawnPoint`
-
-#### Methods
-
-- `Instance:AddComponent(name: string)`
-- `Instance:RemoveComponent(name: string)`
-- `Instance:HasComponent(name: string)`
-
-- `Instance:Destroy()`
-
-- `Instance:FindFirstChild(name: string)`
-- `Instance:GetChildren()`
-- `Instance:IsDescendantOf(ancestor: Instance)`
-
-- `Instance:GetSignal(name: string)`
-- `Instance:Emit(name: string, ...any)`
-
-- `Instance:GetIdentity()`
-
-- `Instance:GetMoveIntent()`
-- `Instance:GetSwingTwistJoint()`
-- `Instance:SetSwingTwistJoint(value: SwingTwistJoint)`
-
-- `Instance:GetLinearVelocity()`
-- `Instance:SetLinearVelocity(value: vector)`
-- `Instance:GetAngularVelocity()`
-- `Instance:SetAngularVelocity(value: vector)`
-
-- `Instance:ApplyForce(force: vector, point: vector?)`
-- `Instance:ApplyImpulse(impulse: vector, point: vector?)`
-- `Instance:ApplyTorque(torque: vector)`
-
-- `Instance:SetBodyMotion(mode: "dynamic" | "kinematic")`
-- `Instance:Rotate(axis: vector, angle: number)`
-
-- `Instance:PlayAnimation(clip: string, fadeSeconds: number?, speed: number?)`
-- `Instance:StopAnimation()`
-- `Instance:ActiveAnimation()`
-- `Instance:AnimationWeight(clip: string)`
-
-- `Instance:PreviewAnimation(clip: string, speed: number?, timeSeconds: number?)`
-- `Instance:AnimationPreview()`
-- `Instance:AdvancePreview()`
-- `Instance:StopPreview()`
-
----
-
-### Signal
-
-Signals are exclusively available to Instances, and Instances have their own signal lifecycle methods that they can use that aren't documented here. See [the standalone Instance page](instances.md#signals) for more details.
-
-### Constructors(s)
-
-!!! note
-    The only way to create a Signal is through Instances. As such, you cannot attach a Signal to anything that's not an Instance.
-
-- `Instance:GetSignal(signalName: string)`
-
-#### Methods
-
-- `signal:Connect(callback: (...unknown))`
-- `signal:Emit()`
-
-!!! danger
-    Neither `signal:Disconnect()` nor `signal:Wait()` are implemented yet (if ever). Such functionality will have to be implemented by yourself.
-
----
-
-### Tween
-
-!!! note
-    Currently, you can only tween UI instances.
-
-#### Constructor(s)
-
-- `Tween(instance, duration, EasingStyle, properties)`
-
-!!! note
-    The types of the constructor arguments are currently unknown.
-
-!!! note "Usable styles"
-    - `Cubic`
-    - `Quad`
-    - `Sine`
-    - `Back`
-    - `Bounce`
-    - `Exponential`
-    - `Elastic`
+See [Instance signals](instances.md#signals) for more details.

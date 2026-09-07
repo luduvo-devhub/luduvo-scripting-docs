@@ -4,14 +4,88 @@ icon: lucide/box
 
 # Components
 
+Components are data that can be attached to [Instances](../instances.md) to define their behavior, appearance, relationship between other Instances, and more. More often than not, Components store their data in the form of table items called "fields".
+
 !!! warning
-    Scripting components and Editor components are currently different enough to the point that they might as well be treated as separate systems. Do not rely on component hierarchies displayed by the editor, as they do not reflect the actual scripting component hierarchy.
+    In Luduvo Studio, the values you see in the Editor are different from the actual components that you will be accessing in your scripts. For some reason, the Editor mixes, shuffles, renames, and otherwise reorganizes components and some their fields into new groups such as **Transform**, **Data**, **Physics**, **Color**, **Material**, and more. While they proclaim that these are "Components", they do not accurately represent the actual internal component names. For example, the Editor's "Transform" Component really is a combination of separate `Position`, `Rotation`, and `Scale` Components. "Transform" is not a real component name.
+
+## Script access
+
+Every Component can be used as an exact, case-sensitive filter with [`game.World.Query`](../query.md), `Query:With`, `Query:Without`,`game.World.Each`, `Instance:HasComponent`, `Instance:AddComponent`, and `Instance:RemoveComponent`, subject to the component's write scope.
+
+Currently, only 4 Components expose fields that can be accessed through a Query:
+
+| Query column | Luau type | Scope |
+| --- | --- | :---: |
+| `query.Position[i]` | `vector` | read/write |
+| `query.Scale[i]` | `vector` | read/write |
+| `query.BrickColor[i]` | `vector` | read/write |
+| `query.Velocity[i]` | `vector` | read-only |
+
+All other built-ins only can act as a filter in a Query. Some Components still have other means of indirect access though a separate Instance/game-service property or method, but many do not. You cannot access components through an Instance directly like `Instance.Component.field`.
+
+## Custom data
+
+Currently, you cannot make your own custom components. Components are hard coded into the engine, and `AddComponent` can only attach Components from a giant lookup table. However, Luduvo itself defines two built-in Components as being "custom":
+
+```luau
+type PlayerSpawnerComponent = {
+    character: string,
+    respawnDelay: number,
+}
+
+type ToolComponent = {
+    equipped: number, -- U8, clamped to 0 through 255
+}
+```
+
+These 2 custom components are the only Components that get exposed to Query as a table of fields rather than a single value. 
+
+If you need to store custom data directly on an Instance, you can still use [Instance Attributes](../instances.md#attributes).
+
+## Types of Components
+
+While internally all components are formatted the same (assuming they store data), Query selectively exposes some of their fields in different ways.
+
+### Value-Based Components
+
+Value-based components are components that are so simple that they can be represented by a single value. When you access a value-based component in Queries, you directly read and write to the component itself instead of needing to access a nested field. Not all simple components are value-based, but some built-in components are.
+
+For example, [`Position`](Position.md){ data-preview } is a value-based component that can be expressed as a single `Vector3` value. As such, accessing it in Queries looks like this:
+
+```luau
+for i = 1, query.count do
+    local position = query[i].Position
+    print(position)
+    query[i].Position += Vector3.new(1, 2, 3)
+end
+```
+
+### Field-Based Components
+
 !!! note
-    Components are currently not well documented. If you can, Contribute!
+    Currently, only components marked as "custom" ([`Tool`](Tool.md){ data-preview } and [`PlayerSpawner`](PlayerSpawner.md){ data-preview }) can be accessed as field-based components.
 
-Luduvo Components are bits of data that define the behavior and appearance of [Instances](luduvo-scripting-docs/api/instances). While there are ways to individually add, remove, and edit Components, Components largely only matter when [Querying](luduvo-scripting-docs/api/query) Instances, and are generally for internal use. If you feel the need to edit a Component, the best way of doing do by manipulating the Instance itself.
+Field-based components are components that have fields that must be directly named to be accessed and modified. When you access a field-based component in Queries, you need to use dot notation to specify what field you want to access before you are able to read or write to it.
 
-Currently, Components are hardcoded into Luduvo's internals, so creating custom Components are impossible. Instead, you can choose from the following built-in components:
+For example, take [`Tool`](Tool.md){ data-preview }:
+
+```luau
+for i = 1, query.count do
+    local equipped = query[i].Tool.equipped
+    if equipped then
+        print("A player is holding a tool!")
+    end
+end
+```
+
+### Tag Components
+
+Tag components are special components that intentionally do not have any fields. They function as markers that other systems check the existence (or lack thereof) to preform specific actions.
+
+For example, Instances marked with an [`Anchored`](Anchored.md){ data-preview } Component tag will be purposely ignored by physics systems.
+
+## Built-in component names
 
 - [Admin](Admin.md)
 - [AmbientLight](AmbientLight.md)

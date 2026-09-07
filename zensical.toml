@@ -13,7 +13,29 @@ edit_uri = "edit/main/docs/"
 nav = [
   { "Index" = "index.md" },
   { "Contributing" = "contributing.md" },
+  { "Editor" = [
+    "editor/index.md",
+    # NAVGEN -- TABS
+    { "Tabs" = [
+      "editor/tabs/index.md",
 
+      { "Animation" = "editor/tabs/animation.md" },
+      { "Assets" = "editor/tabs/assets.md" },
+      { "Entity Report" = "editor/tabs/entity-report.md" },
+      { "Learn Luduvo" = "editor/tabs/learn-luduvo.md" },
+      { "Outliner" = "editor/tabs/outliner.md" },
+      { "Profiler" = "editor/tabs/profiler.md" },
+      { "Properties" = "editor/tabs/properties.md" },
+      { "Script Editor" = "editor/tabs/script-editor.md" },
+      { "Viewport" = "editor/tabs/viewport.md" },
+      { "Welcome" = "editor/tabs/welcome.md" },
+    ] },
+    # NAVGEN -- TABS END
+
+    # NAVGEN -- EDITOR COMPONENTS
+    { "Components" = ["editor/components/index.md"] },
+    # NAVGEN -- EDITOR COMPONENTS END
+  ] },
   { "API" = [
     "api/index.md",
 
@@ -64,6 +86,7 @@ nav = [
     { "Mesh" = "api/components/Mesh.md" },
     { "Name" = "api/components/Name.md" },
     { "NoContactFriction" = "api/components/NoContactFriction.md" },
+    { "PlayerSpawner" = "api/components/PlayerSpawner.md" },
     { "Position" = "api/components/Position.md" },
     { "PrefabAnchor" = "api/components/PrefabAnchor.md" },
     { "PrefabInstance" = "api/components/PrefabInstance.md" },
@@ -84,6 +107,7 @@ nav = [
     { "SurfaceAppearance" = "api/components/SurfaceAppearance.md" },
     { "SurfaceMaterial" = "api/components/SurfaceMaterial.md" },
     { "SwingTwistJoint" = "api/components/SwingTwistJoint.md" },
+    { "Tool" = "api/components/Tool.md" },
     { "Transparency" = "api/components/Transparency.md" },
     { "UIClickable" = "api/components/UIClickable.md" },
     { "UIClips" = "api/components/UIClips.md" },
@@ -116,8 +140,8 @@ nav = [
     { "Character" = "api/prefabs/character.md" },
     { "Menu" = "api/prefabs/menu.md" },
     { "Part" = "api/prefabs/part.md" },
-    { "Playerspawner" = "api/prefabs/playerspawner.md" },
-    { "Spawnlocation" = "api/prefabs/spawnlocation.md" },
+    { "PlayerSpawner" = "api/prefabs/playerspawner.md" },
+    { "SpawnLocation" = "api/prefabs/spawnlocation.md" },
   ] },
   # NAVGEN -- PREFABS END
   ] },
@@ -228,3 +252,4 @@ pymdownx.tabbed.combine_header_slug = true
 pymdownx.tasklist.custom_checkbox = true
 pymdownx.tilde = {}
 pymdownx.blocks.caption = {}
+zensical.extensions.preview = {}

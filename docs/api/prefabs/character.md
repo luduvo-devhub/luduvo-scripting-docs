@@ -1,41 +1,18 @@
 ---
-icon: lucide/box
+icon: lucide/user-round
 ---
-
-!!! note
-    This is a stub and currently a work in progress. Contribute, or come back later for updates!
 
 # Character
 
-Characters are Luduvo's prefab for creating visible, controllable characters in a game. Currently, this is prefab is used to create player characters under the hood, but you can also use the Character prefab to create NPCs or custom character models since very little details on the character's appearance or behavior are hardcoded into the prefab itself.
+!!! note
+    This page is still a work in progress. The spawning API and component names are confirmed; a complete custom-character workflow is not.
 
-## Constructor(s)
+`Character` is one of Luduvo's built-in [Prefabs](index.md){ data-preview }. [`PlayerSpawner`](playerspawner.md) creates it by default, positions the returned root, and passes it to `game.Session.BindCharacter`.
 
-- `Prefab.spawn("Character")`
+```luau
+local character = game.Prefabs.Spawn("Character")
+```
 
-## Components
+`Spawn` is server-only and returns a detached root. Character behavior depends on its character, physics, animation, locomotion, health, rig, and body-part components. The editor's grouped labels are not necessarily the exact names accepted by Query or component methods; use the [component registry](../components/index.md) for scripting names.
 
-### Removable
-
-- `Transform`
-- `Data`
-- `PrefabInstance`
-- `Velocity`
-- `Shape`
-- `Physics`
-- `CollisionGroup`
-- `Color`
-- `Health`
-- `Locomotion`
-- `HumanoidState`
-- `BodyPart`
-
-### Permanent
-
-- `Character`
-- `CharacterRig`
-- `CharacterAnimation`
-- `CharacterPhysics`
-- `AutoRotate`
-- `AutoLocomotion`
-- `Attributes`
+Creating an NPC from this prefab may still require character-state initialization normally performed by the session and character systems. That workflow has not been fully tested.

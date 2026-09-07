@@ -3,17 +3,35 @@ icon: lucide/box
 ---
 
 !!! note
-    This is a stub and currently a work in progress. Contribute, or come back later for updates!
-
-!!! note
-    In the alpha build of Luduvo, scriptable components and components shown/organized in the editor's properties panel are completely different, with some compoents not even being accessible via the editor's properties panel and vice versa. Tread with caution.
+    Studio's property groups and the scripting component API are different. A
+    label shown in the Properties panel is not automatically a component name or
+    a Luau field.
 
 # Rotation
 
-Rotation is a Luduvo component that represents the 3D rotation of an [Instance](luduvo-scripting-docs/api/components/instance).
+`Rotation` is a (case-sensitive) built-in component name that stores an Instance's rotation.
+You can use it with [`game.World.Query`](../query.md){ data-preview },
+`Query:With`, `Query:Without`, [`game.World.Each`](../query.md){ data-preview },
+and the Instance component methods.
 
-Currently, this component is only accessible to scripts via [Query Filters](docs/api/components/Query) and cannot be directly read or edited through scripts.
+## Script access
 
-## Properties
+While this component can be used as a filter in Queries, it currently does not expose any of its fields to Queries. However, it can be accessed via `Instance.Orientation: vector`.
 
-This component has no properties editable through queries. If you need to read or edit rotation values, use the `Orientation` property in Instances instead.
+Inspector fields are serialization/editor metadata and are not automatically
+available as Luau fields. See [Components](index.md){ data-preview } for that
+distinction and [Instances](../instances.md){ data-preview } for fixed property
+types and write scope.
+
+## Stored fields
+
+!!! note
+    Currently, these fields are not directly available as editable Luau. As such, they are reported as the types they are stored as in the engine itself instead of Luau types.
+
+| Field | Stored type | Notes |
+| --- | --- | --- |
+| `x` | `f32` | Quaternion component |
+| `y` | `f32` | Quaternion component |
+| `z` | `f32` | Quaternion component |
+| `w` | `f32` | Quaternion component |
+

@@ -1,30 +1,37 @@
 ---
-icon: lucide/box
+icon: lucide/workflow
 ---
 
 # Systems
 
-Systems in Luduvo are the main way to add logic and behavior to specfic components or component interaction. This is different from `Update` and `PhysicsUpdate`, which should be used for per-entity logic or for logic that transcends any given entity or component.
+Systems in Luduvo are the main way to add logic and behavior to specific components or component interactions. This is different from `Update` and `PhysicsUpdate`, which should be used for per-entity logic or for logic that transcends any given entity or component.
 
-You can register a system using `game.World.System`:
+`game.World.System` hooks a function to a reusable [Query](query.md){ data-preview } prompt:
+
 ```luau
-
-type PhaseType = "Default" | "Physics"
-
 game.World.System(
     name: string,
     query: Query,
     callback: (Query) -> (),
-    phase: PhaseType?
+    phase: "Default" | "Physics"?
 ) -> ()
 ```
-Systems won't run until the component Query given in its `query` argument is satisfied. When it is satisfied, the `callback` is called with the query result as its only argument. For details on the query result, see [Query](query.md). However, unlike regular queries, Luduvo systems streamline query management by automatically:
 
-1. Refreshing the query.
-2. Calling the callback with that query as its only argument.
-3. Flushing staged query writes.
+!!! warning
+    You cannot unregister a System once you make it
 
-In exchange, Luduvo Systems do **not** receive `dt`. If the calculation needs elapsed time, you'll have to track `tick()` yourself:
+`game.World.System` must be called from a script that is attached to an Instance, as the engine internally uses that script Instance to distinguish systems created by different scripts with the same name. Registering the same name again from the same script replaces the old system with the new one.
+
+`phase` decides which group Luduvo runs the system in: `"Physics"` or `"Default"`. The exact ordering relative to internal engine systems is unknown. If no phase is specified, `"Default"` is used.
+
+When a System is registered, Luduvo's system scheduler performs these steps:
+
+1. Refresh the Query.
+2. Call the hooked function with that Query as its only argument, even when `query.count` is zero.
+3. Flush staged Query writes.
+
+While Luduvo handles Query lifecycles, it does not pass delta time to the callback. Use `tick()` differences when elapsed time is required:
+
 ```luau
 local movers = game.World.Query("Position"):Without("Anchored")
 local lastTime = tick()
@@ -39,7 +46,3 @@ game.World.System("Drift", movers, function(rows)
     end
 end, "Default")
 ```
-
-When you register a system, the system registration belongs to the current script under the name `name`. If you register a new system with the same name again later in the same script, it silently overwrites the old registration with the new query and callback. 
-
-`phase` dictates the order in which the system is executed relative to other systems. In Luduvo and other ECS game engines, every System is organized into a handful of "phases" that run by the discretion of the engine. If `phase` is omitted, the system will automatically choose "Default" as the phase. Inside each phase, systems are likely organized by youngest to oldest registration.

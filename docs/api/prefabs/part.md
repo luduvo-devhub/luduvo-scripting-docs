@@ -2,33 +2,22 @@
 icon: lucide/box
 ---
 
-!!! note
-    This is a stub and currently a work in progress. Contribute, or come back later for updates!
-
 # Part
-Parts is Luduvo's prefab for the basic building block of a game. 
-
-## Constructor(s)
-
-- `Prefab.spawn("Part")`
 
 !!! note
-    Parts are automatically parented to the 3D world.
+    This page is still a work in progress.
 
-## Components
+`Part` is Luduvo's basic visible physics-object prefab.
 
-### Removable
+```luau
+local part = game.Prefabs.Spawn("Part")
 
-- `Position`
-- `Rotation`
-- `Scale`
-- `Data`
-- `PrefabInstance`
-- `Shape`
-- `RigidBody`
-- `BrickColor`
-- `Material`
+if part ~= nil then
+    part.Position = Vector3.new(0, 5, 0)
+    part.Parent = self
+end
+```
 
-### Permanent
+`Spawn` is server-only. The returned root is detached, so set `Parent` explicitly when it should enter an existing hierarchy.
 
-- `Attributes`
+Studio groups several fields under labels such as Transform, Data, Physics, Color, and Material. The corresponding scripting component names include `Position`, `Rotation`, `Scale`, `Name`, `RigidBody`, `BrickColor`, and `SurfaceMaterial`; the group labels themselves are not component names.

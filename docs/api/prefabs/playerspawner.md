@@ -1,32 +1,30 @@
 ---
-icon: lucide/box
+icon: lucide/users-round
 ---
 
+# PlayerSpawner
+
 !!! note
-    This is a stub and currently a work in progress. Contribute, or come back later for updates!
+    This page is still a work in progress.
 
-# Player Spawner
+`PlayerSpawner` is the built-in server prefab that creates and binds player characters. Its core script is available read-only at `core://scripts/PlayerSpawner.lua`.
 
-Player Spawners are an internal Luduvo's prefab for the logic behind spawning player characters in a game. They go hand-in-hand with the [Spawn Location](spawnlocation.md) prefab, where components with the spawn location defines the elegible locations where players can be spawned by the Player Spawner.
+```luau
+local spawner = game.Prefabs.Spawn("PlayerSpawner")
+```
 
-Player Spawners use the special `Server Script (Luduvo)` component to define the logic for spawning players, which cannot be removed or edited in any way. Currently, you can see the source code for the Player Spawner prefab in `core://scripts/PlayerSpawner.lua`.
+The logical name has no space. `Spawn` is server-only and returns a detached root.
 
-## Constructor(s)
+This prefab carries a platform custom component with two exact fields:
 
-- `Prefab.spawn("Player Spawner")`
+```luau
+type PlayerSpawnerComponent = {
+    character: string,
+    respawnDelay: number,
+}
 
-## Components
+self.PlayerSpawner.character = "Character"
+self.PlayerSpawner.respawnDelay = 3
+```
 
-### Removable
-
-- `Player Spawner`
-- `Data`
-- `PrefabInstance`
-
-### Permanent
-
-- `Attributes`
-
-### Untouchable
-
-- `Server Script (Luduvo)`
+The core script listens for session joins, leaves, and character deaths, chooses an entity with the `SpawnPoint` component, spawns the configured character prefab, and calls `game.Session.BindCharacter`.

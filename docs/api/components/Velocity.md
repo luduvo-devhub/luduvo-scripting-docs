@@ -3,16 +3,31 @@ icon: lucide/box
 ---
 
 !!! note
-    This is a stub and currently a work in progress. Contribute, or come back later for updates!
-
-!!! note
-    In the alpha build of Luduvo, scriptable components and components shown/organized in the editor's properties panel are completely different, with some compoents not even being accessible via the editor's properties panel and vice versa. Tread with caution.
+    Studio's property groups and the scripting component API are different. A
+    label shown in the Properties panel is not automatically a component name or
+    a Luau field.
 
 # Velocity
 
-Stub
+`Velocity` is a (case-sensitive) built-in component name that stores an Instance's linear velocity.
+You can use it with [`game.World.Query`](../query.md){ data-preview },
+`Query:With`, `Query:Without`, [`game.World.Each`](../query.md){ data-preview },
+and the Instance component methods.
 
-Currently, this component is only accessible to scripts via [Query Filters](/luduvo-scripting-docs/api/query) and cannot be directly read or edited through scripts.
+## Script access
 
-## Properties
-This component currently has no properties editable through queries, Instances, or any other means.
+As a [Value-Based Component](index.md#value-based-components){ data-preview }, Queries expose `query.Velocity[i]` as `vector` (read-only). It can also be accessed via `Instance.Velocity: vector` and the velocity methods.
+
+Inspector fields are serialization/editor metadata and are not automatically
+available as Luau fields. See [Components](index.md){ data-preview } for that
+distinction and [Instances](../instances.md){ data-preview } for fixed property
+types and write scope.
+
+## Stored fields
+
+| Field | Stored type | Notes |
+| --- | --- | --- |
+| `x` | `number` |  |
+| `y` | `number` |  |
+| `z` | `number` |  |
+

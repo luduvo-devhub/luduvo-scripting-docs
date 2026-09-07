@@ -30,8 +30,8 @@ icon: simple/markdown
 ```
 [Link text](https://example.com)
 [Link with title](https://example.com "Hover title")
-![Alt text](image.jpg)
-![Image with title](image.jpg "Image title")
+![Alt text](https://example.com/image.jpg)
+![Image with title](https://example.com/image.jpg "Image title")
 ```
 
 ## Lists
