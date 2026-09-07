@@ -55,9 +55,9 @@ For example, [`Position`](Position.md){ data-preview } is a value-based componen
 
 ```luau
 for i = 1, query.count do
-    local position = query[i].Position
+    local position = query.Position[i]
     print(position)
-    query[i].Position += Vector3.new(1, 2, 3)
+    query.Position[i] += Vector3.new(1, 2, 3)
 end
 ```
 
@@ -72,7 +72,7 @@ For example, take [`Tool`](Tool.md){ data-preview }:
 
 ```luau
 for i = 1, query.count do
-    local equipped = query[i].Tool.equipped
+    local equipped = query.Tool[i].equipped
     if equipped then
         print("A player is holding a tool!")
     end

@@ -254,6 +254,8 @@ type SwingTwistJoint = {
 
 #### Methods
 
+| Method | Scope | Behavior |
+| --- | --- | --- |
 | `GetLinearVelocity() -> vector` | Server only | Reads live internal `PhysicsBody` velocity, or zero when no live body exists. It does not read the public [`Velocity`](components/Velocity.md) Component directly. |
 | `SetLinearVelocity(value: vector) -> ()` | Server only | Changes internal `PhysicsBody` velocity and writes the public [`Velocity`](components/Velocity.md) Component. It is ignored when there is no dynamic body. |
 | `GetAngularVelocity() -> vector` | Server only | Reads live internal `PhysicsBody` angular velocity, or zero when no live body exists. |

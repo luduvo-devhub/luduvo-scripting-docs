@@ -198,8 +198,7 @@ FIELDS = {
         "fallenPartsDestroyHeight gravity sleepVelocityThreshold viewRadius", "f32"
     ),
     "Tool": fields("equipped", "Boolean"),
-    "PlayerSpawner": [("character", "respawnDelay", ""), ("Enum", "number", "")],
-}
+    "PlayerSpawner": [("character", "Enum", ""), ("respawnDelay", "number", "")],}
 
 TAG_COMPONENTS = {
     "Anchored",

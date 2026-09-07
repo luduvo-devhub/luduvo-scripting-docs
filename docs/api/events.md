@@ -68,7 +68,7 @@ When making fields for an EventTable, these are the supported field types you ca
 
 ??? tip "Getting around EventTable field restrictions"
 
-    If you need to send a string, convert it into bytes with `string.charCodeAt()` or `string.byte()`, and use a `U8` field type.
+    If you need to send a string, convert it into bytes with `string.byte()`, and use a `U8` field type.
 
     If you need to encode an array, send each element as a separate event or consolidate the array into a single value that you can then decode and reseparate once you receive it.
 
